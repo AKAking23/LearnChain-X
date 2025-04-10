@@ -1,0 +1,168 @@
+/* 整体应用容器 */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 头部导航 */
+.app-header {
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.main-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  transition: color 0.3s;
+}
+
+.main-nav a:hover {
+  color: #646cff;
+}
+
+/* 主内容区域 */
+.app-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 页脚 */
+.app-footer {
+  background-color: #1a1a1a;
+  color: #888;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+/* 页面组件通用样式 */
+.home-page, .about-page, .courses-page, .dashboard-page, .not-found-page {
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin-bottom: 1.5rem;
+  color: #213547;
+}
+
+.navigation-links, .back-link {
+  margin-top: 2rem;
+}
+
+.navigation-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link, .home-link, .course-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.nav-link:hover, .home-link:hover, .course-link:hover {
+  background-color: #535bf2;
+}
+
+/* 课程列表样式 */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.course-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.course-level {
+  display: inline-block;
+  margin: 0.5rem 0;
+  padding: 0.25rem 0.5rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+/* 仪表板样式 */
+.user-info, .enrolled-courses, .certificates {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.course-item, .certificate-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.progress-bar {
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #646cff;
+}
+
+/* 媒体查询 - 响应式设计 */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .main-nav ul {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+} 
