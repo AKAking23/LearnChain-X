@@ -29,4 +29,10 @@ const Layout: React.FC = () => {
   );
 };
 
+const changelang = () => {
+  // const lang = localStorage.setItem('lang', 'en');
+  const lang = localStorage.setItem('lang', 'zhcn');
+  console.log(lang);
+}
+changelang();
 export default Layout; 

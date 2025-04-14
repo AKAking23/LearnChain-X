@@ -1,0 +1,224 @@
+{
+	"nc8vrob": {
+		"zh-cn": "404 - 页面未找到",
+		"en": "404- Page not found",
+		"ko": "404 - 페이지를 찾을 수 없음",
+		"ja": "404-ページが見つかりません"
+	},
+	"sq9zfxd": {
+		"zh-cn": "抱歉，您访问的页面不存在。",
+		"en": "Sorry, the page you visited does not exist.",
+		"ko": "죄송합니다. 방문한 페이지가 없습니다.",
+		"ja": "申し訳ありませんが、アクセスしたページは存在しません。"
+	},
+	"iijhd54": {
+		"zh-cn": "返回首页",
+		"en": "homepage",
+		"ko": "첫 페이지로 돌아가기",
+		"ja": "トップページに戻る"
+	},
+	"qylb2": {
+		"zh-cn": "首页",
+		"en": "home page",
+		"ko": "첫 페이지",
+		"ja": "トップページ"
+	},
+	"ohcd2": {
+		"zh-cn": "课程",
+		"en": "course",
+		"ko": "과정",
+		"ja": "カリキュラム"
+	},
+	"ea9n2": {
+		"zh-cn": "关于",
+		"en": "about",
+		"ko": "정보",
+		"ja": "について"
+	},
+	"a6ttl24": {
+		"zh-cn": "个人中心",
+		"en": "Personal Center",
+		"ko": "개인 센터",
+		"ja": "パーソナルセンター"
+	},
+	"boes5fl": {
+		"zh-cn": "LearnChain-X. 保留所有权利。",
+		"en": "LearnChain-X. All rights reserved.",
+		"ko": "LearnChain-X. 모든 권리를 보유합니다.",
+		"ja": "LearnChain-X.すべての権利を保持します。"
+	},
+	"2g231m7": {
+		"zh-cn": "区块链基础入门",
+		"en": "Introduction to Blockchain Fundamentals",
+		"ko": "블록체인 기반 시작",
+		"ja": "ブロックチェーン基礎入門"
+	},
+	"8wuwcui": {
+		"zh-cn": "了解区块链的基本概念、原理和应用场景",
+		"en": "Understand the basic concepts, principles, and application scenarios of blockchain",
+		"ko": "블록체인의 기본 개념, 원리와 응용 장면을 이해하다",
+		"ja": "ブロックチェーンの基本概念、原理、応用シーンを理解する"
+	},
+	"enu22": {
+		"zh-cn": "初级",
+		"en": "primary",
+		"ko": "초급",
+		"ja": "初級"
+	},
+	"isu6eda": {
+		"zh-cn": "以太坊与智能合约开发",
+		"en": "Ethereum and Smart Contract Development",
+		"ko": "이더리움과 스마트 계약 개발",
+		"ja": "エーテル坊とインテリジェント契約開発"
+	},
+	"igmduhm": {
+		"zh-cn": "学习以太坊平台和Solidity智能合约开发",
+		"en": "Learn Ethereum platform and Solidity smart contract development",
+		"ko": "학습 이더리움 플랫폼 및 Solidity 스마트 계약 개발",
+		"ja": "イーサ坊プラットフォームとSolidityインテリジェント契約開発を学ぶ"
+	},
+	"dzq22": {
+		"zh-cn": "中级",
+		"en": "intermediate",
+		"ko": "중급",
+		"ja": "中級"
+	},
+	"4a0ra0a": {
+		"zh-cn": "DApp全栈开发实战",
+		"en": "DApp Full Stack Development Practice",
+		"ko": "DApp 전체 스택 개발 실전",
+		"ja": "DAppフルスタック開発の実戦"
+	},
+	"r16pa5h": {
+		"zh-cn": "从前端到后端，完整开发去中心化应用",
+		"en": "Complete development of decentralized applications from front-end to back-end",
+		"ko": "프런트엔드에서 백엔드로 분산된 애플리케이션을 완벽하게 개발",
+		"ja": "フロントエンドからバックエンドまで、完全なデセンタリングアプリケーションの開発"
+	},
+	"r1732": {
+		"zh-cn": "高级",
+		"en": "senior",
+		"ko": "고급",
+		"ja": "高級"
+	},
+	"i5xola4": {
+		"zh-cn": "课程列表",
+		"en": "Course List",
+		"ko": "강좌 목록",
+		"ja": "カリキュラムリスト"
+	},
+	"miyky3": {
+		"zh-cn": "难度:",
+		"en": "Difficulty:",
+		"ko": "난이도:",
+		"ja": "難易度："
+	},
+	"dluvhh4": {
+		"zh-cn": "查看详情",
+		"en": "View details",
+		"ko": "자세히 보기",
+		"ja": "詳細の表示"
+	},
+	"glwp2": {
+		"zh-cn": "张三",
+		"en": "Zhang San",
+		"ko": "장 삼",
+		"ja": "張三"
+	},
+	"2gbxpg7": {
+		"zh-cn": "区块链基础认证",
+		"en": "Blockchain Basic Authentication",
+		"ko": "블록체인 기반 인증",
+		"ja": "ブロックチェーン基礎認証"
+	},
+	"f6qmm54": {
+		"zh-cn": "用户信息",
+		"en": "user information",
+		"ko": "사용자 정보",
+		"ja": "ユーザー情報"
+	},
+	"djxsw3": {
+		"zh-cn": "姓名:",
+		"en": "full name:",
+		"ko": "이름:",
+		"ja": "名前："
+	},
+	"lrxlj3": {
+		"zh-cn": "邮箱:",
+		"en": "Email:",
+		"ko": "메일박스:",
+		"ja": "メールアドレス："
+	},
+	"cvbkio4": {
+		"zh-cn": "我的课程",
+		"en": "My courses",
+		"ko": "내 수업",
+		"ja": "マイレッスン"
+	},
+	"14e734": {
+		"zh-cn": "% 完成",
+		"en": "%Completed",
+		"ko": "% 완료",
+		"ja": "%完了"
+	},
+	"gj8zz44": {
+		"zh-cn": "继续学习",
+		"en": "Continue learning",
+		"ko": "계속 공부하다",
+		"ja": "勉強を続ける"
+	},
+	"cvbafs4": {
+		"zh-cn": "我的证书",
+		"en": "My certificate",
+		"ko": "내 인증서",
+		"ja": "マイ証明書"
+	},
+	"u9qfog5": {
+		"zh-cn": "获得日期:",
+		"en": "Date of Acquisition:",
+		"ko": "획득 날짜:",
+		"ja": "取得日："
+	},
+	"cg3pdz5": {
+		"zh-cn": "学习区块链",
+		"en": "Learn about blockchain technology",
+		"ko": "블록체인 학습",
+		"ja": "学習ブロックチェーン"
+	},
+	"oqtkmww": {
+		"zh-cn": "欢迎来到LearnChain-X平台，这里提供区块链技术学习资源",
+		"en": "Welcome to LearnChain-X platform, which provides learning resources for blockchain technology",
+		"ko": "블록체인 기술 학습 리소스를 제공하는 LearnChain-X 플랫폼에 오신 것을 환영합니다.",
+		"ja": "ブロックチェーン技術学習リソースを提供するLearnChain-Xプラットフォームへようこそ"
+	},
+	"alt7ee4": {
+		"zh-cn": "关于我们",
+		"en": "About Us",
+		"ko": "우리에 대해",
+		"ja": "私たちについて"
+	},
+	"9g7okj1e": {
+		"zh-cn": "LearnChain-X是一个专注于区块链技术教育的平台，我们致力于帮助更多人了解和掌握区块链技术。",
+		"en": "LearnChain-X is a platform dedicated to blockchain technology education, and we are committed to helping more people understand and master blockchain technology.",
+		"ko": "LearnChain-X는 더 많은 사람들이 블록체인 기술을 이해하고 이해할 수 있도록 돕는 블록체인 기술 교육에 집중하는 플랫폼입니다.",
+		"ja": "LearnChain-Xはブロックチェーン技術教育に専念するプラットフォームであり、ブロックチェーン技術の理解と把握をより多くの人に支援することに力を入れています。"
+	},
+	"6w5eu519": {
+		"zh-cn": "我们提供从入门到精通的系列课程，涵盖区块链基础知识、智能合约开发、DApp开发等多个方面。",
+		"en": "We offer a series of courses from beginner to master, covering various aspects such as blockchain fundamentals, smart contract development, DApp development, and more.",
+		"ko": "우리는 블록체인 기초 지식, 스마트 계약 개발, DApp 개발 등 다양한 방면을 포괄하는 입문부터 정통까지 일련의 과정을 제공한다.",
+		"ja": "ブロックチェーンの基礎知識、インテリジェント契約開発、DApp開発など、入門から精通までの一連のカリキュラムを提供しています。"
+	},
+	"watri15": {
+		"zh-cn": "我们的使命",
+		"en": "Our mission",
+		"ko": "우리의 사명",
+		"ja": "私たちの使命"
+	},
+	"hisk3xx": {
+		"zh-cn": "普及区块链知识，培养区块链技术人才，推动区块链技术在各行业的应用。",
+		"en": "Popularize blockchain knowledge, cultivate blockchain technology talents, and promote the application of blockchain technology in various industries.",
+		"ko": "블록체인지식을 보급하고 블록체인기술인재를 양성하며 블록체인기술의 각 업종에서의 응용을 추진한다.",
+		"ja": "ブロックチェーン知識を普及させ、ブロックチェーン技術の人材を育成し、各業界におけるブロックチェーン技術の応用を推進する。"
+	}
+}
