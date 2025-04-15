@@ -1,173 +1,155 @@
-/*
-/// Module: chain_contract
-/// 这是一个SBT（灵魂绑定代币）合约，用于创建不可转让的数字资产
-*/
-module chain_contract::sbt {
-    use sui::object::{Self, UID};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
-    use sui::package;
-    use sui::display;
-    use std::string::{Self, String};
-    use sui::event;
-    use sui::table::{Self, Table};
+/**
+ * LearnChain-X 系统核心合约
+ * 此模块负责整个系统的配置管理和版本控制
+ */
+module chain_contract::chain_contract;
 
-    // ===== 错误代码 =====
-    const ESoulboundTransferNotAllowed: u64 = 1;
-    const ENotOwner: u64 = 2;
+use std::string::{Self, String};
+use sui::object::{Self, UID};
+use sui::table::{Self, Table};
+use sui::transfer;
+use sui::tx_context::{Self, TxContext};
 
-    // ===== 类型定义 =====
-    /// SBT主对象，被用户拥有
-    public struct SoulboundToken has key, store {
-        id: UID,
-        /// SBT名称
-        name: String,
-        /// SBT描述
-        description: String,
-        /// 元数据URL（如图像）
-        url: String,
-        /// 发行者
-        issuer: address,
-        /// 其他属性
-        attributes: Table<String, String>,
-    }
+// 错误码
+/// 当操作者不是系统管理员时返回此错误
+const ENotAuthorized: u64 = 0;
 
-    /// 发布者凭证，用于验证发布者身份
-    public struct IssuerCap has key, store {
-        id: UID,
-        issuer: address,
-    }
+/**
+     * 系统配置结构
+     * 存储系统的全局参数和配置信息
+     */
+public struct SystemConfig has key {
+    id: UID,
+    /// 系统当前版本号，用于版本控制
+    version: u64,
+    /// 系统名称
+    name: String,
+    /// 系统管理员地址，只有管理员可以更改系统设置
+    admin: address,
+    /// 系统动态参数表，可存储各种配置值
+    params: Table<String, String>,
+}
 
-    /// 一次性见证对象，用于初始化
-    public struct SBT has drop {}
+/**
+     * 初始化系统配置
+     * 在模块部署时自动执行一次
+     * 创建系统配置对象并设置默认参数
+     */
+fun init(ctx: &mut TxContext) {
+    let params = table::new<String, String>(ctx);
 
-    // ===== 事件 =====
-    /// 当SBT被铸造时发出的事件
-    public struct SBTMinted has copy, drop {
-        id: address,
-        recipient: address,
-        name: String,
-    }
+    // 添加默认系统参数
+    // 答题奖励积分的最小值
+    // table::add(&mut params, string::utf8(b"min_reward"), string::utf8(b"1"));
+    // // 答题奖励积分的最大值
+    // table::add(&mut params, string::utf8(b"max_reward"), string::utf8(b"100"));
+    // // 查看解析所需的最低积分成本
+    // table::add(&mut params, string::utf8(b"min_solution_cost"), string::utf8(b"5"));
 
-    // ===== 模块初始化 =====
-    fun init(otw: SBT, ctx: &mut TxContext) {
-        let publisher = package::claim(otw, ctx);
-        
-        // 创建显示信息
-        let keys = vector[
-            string::utf8(b"name"),
-            string::utf8(b"description"),
-            string::utf8(b"image_url"),
-            string::utf8(b"issuer"),
-        ];
-        
-        let values = vector[
-            string::utf8(b"{name}"),
-            string::utf8(b"{description}"),
-            string::utf8(b"{url}"),
-            string::utf8(b"{issuer}"),
-        ];
-        
-        // 创建Display对象
-        let mut display_obj = display::new_with_fields<SoulboundToken>(
-            &publisher, keys, values, ctx
-        );
-        display::update_version(&mut display_obj);
-        transfer::public_transfer(display_obj, tx_context::sender(ctx));
+    // 创建系统配置对象
+    let config = SystemConfig {
+        id: object::new(ctx),
+        version: 1, // 初始版本号为1
+        name: string::utf8(b"LearnChain-X Quiz System"),
+        admin: tx_context::sender(ctx), // 部署者成为初始管理员
+        params,
+    };
 
-        // 转移发布者对象，使其不再可访问
-        transfer::public_transfer(publisher, tx_context::sender(ctx));
-        
-        // 创建并转移发行者凭证给模块部署者
-        let issuer_cap = IssuerCap {
-            id: object::new(ctx),
-            issuer: tx_context::sender(ctx),
-        };
-        transfer::transfer(issuer_cap, tx_context::sender(ctx));
-    }
+    // 共享系统配置对象，使其全局可访问
+    transfer::share_object(config);
+}
 
-    // ===== 公共函数 =====
-    /// 只有发行者能铸造SBT
-    public entry fun mint(
-        issuer_cap: &IssuerCap,
-        name: String,
-        description: String,
-        url: String,
-        recipient: address,
-        ctx: &mut TxContext
-    ) {
-        let attributes = table::new<String, String>(ctx);
-        
-        let sbt = SoulboundToken {
-            id: object::new(ctx),
-            name,
-            description,
-            url,
-            issuer: issuer_cap.issuer,
-            attributes,
-        };
+/**
+     * 更新系统参数
+     * @param config - 系统配置对象
+     * @param param_name - 参数名称
+     * @param param_value - 参数值
+     * @param ctx - 交易上下文
+     */
+public entry fun update_param(
+    config: &mut SystemConfig,
+    param_name: String,
+    param_value: String,
+    ctx: &mut TxContext,
+) {
+    // 验证调用者是否为系统管理员
+    assert!(tx_context::sender(ctx) == config.admin, ENotAuthorized);
 
-        event::emit(SBTMinted {
-            id: object::uid_to_address(&sbt.id),
-            recipient,
-            name: sbt.name,
-        });
-
-        // 直接转移给接收者
-        transfer::transfer(sbt, recipient);
-    }
-
-    /// 添加SBT属性，仅所有者可调用
-    public entry fun add_attribute(
-        sbt: &mut SoulboundToken, 
-        name: String, 
-        value: String,
-        ctx: &mut TxContext
-    ) {
-        // 由于无法直接获取对象所有者，我们使用交易发送者作为授权
-        // 这里的前提是交易必须由SBT所有者发起
-        // 在实际应用中，可以添加更复杂的授权逻辑
-        let _sender = tx_context::sender(ctx);
-        
-        table::add(&mut sbt.attributes, name, value);
-    }
-
-    /// 查询SBT的属性值
-    public fun get_attribute(sbt: &SoulboundToken, name: &String): String {
-        *table::borrow(&sbt.attributes, *name)
-    }
-
-    /// 验证是否存在某个属性
-    public fun has_attribute(sbt: &SoulboundToken, name: &String): bool {
-        table::contains(&sbt.attributes, *name)
-    }
-
-    /// 获取SBT的名称
-    public fun name(sbt: &SoulboundToken): String {
-        sbt.name
-    }
-
-    /// 获取SBT的描述
-    public fun description(sbt: &SoulboundToken): String {
-        sbt.description
-    }
-
-    /// 获取SBT的URL
-    public fun url(sbt: &SoulboundToken): String {
-        sbt.url
-    }
-
-    /// 获取SBT的发行者
-    public fun issuer(sbt: &SoulboundToken): address {
-        sbt.issuer
-    }
-
-    // ===== 测试函数 =====
-    #[test_only]
-    /// 仅用于测试的初始化函数
-    public fun test_init(ctx: &mut TxContext) {
-        init(SBT {}, ctx)
+    // 检查参数是否已存在
+    if (table::contains(&config.params, param_name)) {
+        // 更新现有参数值
+        *table::borrow_mut(&mut config.params, param_name) = param_value;
+    } else {
+        // 添加新参数
+        table::add(&mut config.params, param_name, param_value);
     }
 }
 
+/**
+     * 更新系统版本号
+     * @param config - 系统配置对象
+     * @param new_version - 新版本号
+     * @param ctx - 交易上下文
+     */
+public entry fun update_version(config: &mut SystemConfig, new_version: u64, ctx: &mut TxContext) {
+    // 验证调用者是否为系统管理员
+    assert!(tx_context::sender(ctx) == config.admin, ENotAuthorized);
+    // 确保新版本号大于当前版本号（版本只能递增）
+    assert!(new_version > config.version, ENotAuthorized);
 
+    // 更新版本号
+    config.version = new_version;
+}
+
+/**
+     * 更新系统管理员
+     * @param config - 系统配置对象
+     * @param new_admin - 新管理员地址
+     * @param ctx - 交易上下文
+     */
+public entry fun update_admin(config: &mut SystemConfig, new_admin: address, ctx: &mut TxContext) {
+    // 验证调用者是否为当前系统管理员
+    assert!(tx_context::sender(ctx) == config.admin, ENotAuthorized);
+
+    // 更新管理员地址
+    config.admin = new_admin;
+}
+
+/**
+     * 获取系统当前版本号
+     * @param config - 系统配置对象
+     * @return 当前版本号
+     */
+public fun get_version(config: &SystemConfig): u64 {
+    config.version
+}
+
+/**
+     * 获取系统名称
+     * @param config - 系统配置对象
+     * @return 系统名称
+     */
+public fun get_name(config: &SystemConfig): String {
+    config.name
+}
+
+/**
+     * 获取指定系统参数的值
+     * @param config - 系统配置对象
+     * @param param_name - 参数名称
+     * @return 参数值
+     */
+public fun get_param(config: &SystemConfig, param_name: &String): String {
+    assert!(table::contains(&config.params, *param_name), 1);
+    *table::borrow(&config.params, *param_name)
+}
+
+/**
+     * 检查指定地址是否为系统管理员
+     * @param config - 系统配置对象
+     * @param addr - 待检查的地址
+     * @return 是否为管理员
+     */
+public fun is_admin(config: &SystemConfig, addr: address): bool {
+    config.admin == addr
+}

@@ -5,6 +5,7 @@ import About from './pages/About';
 import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
+import Wallet from './pages/Wallet';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <Dashboard />
+      },
+      {
+        path: 'wallet',
+        element: <Wallet />
       },
       {
         path: '*',
