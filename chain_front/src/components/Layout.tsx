@@ -19,9 +19,9 @@ const InnerLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <footer className="app-footer">
+      {/* <footer className="app-footer">
         <p>&copy; {new Date().getFullYear()} LearnChain-X. 保留所有权利。</p>
-      </footer>
+      </footer> */}
     </div>
   );
 };

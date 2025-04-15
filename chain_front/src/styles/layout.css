@@ -9,7 +9,7 @@
 
 /* 头部导航 */
 .app-header {
-  background-color: #1a1a1a;
+  background-color: #ffffff;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -165,7 +165,7 @@ h1 {
 /* 媒体查询 - 响应式设计 */
 @media (max-width: 768px) {
   .app-header {
-    flex-direction: column;
+    /* flex-direction: column; */
     padding: 1rem;
   }
 
@@ -177,4 +177,28 @@ h1 {
   .courses-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* 渐变色背景标题 */
+.gradient-bg-title{
+  margin: 0 auto;
+}
+.gradient-bg-title h2 {
+  font-size: 3rem;
+  font-weight: 800;
+  width: fit-content;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin: 0 auto;
+}
+.gradient-bg-title p {
+  width: 70%;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin: 10px auto;
 }

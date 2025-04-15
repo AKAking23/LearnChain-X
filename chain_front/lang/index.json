@@ -340,5 +340,23 @@
 		"en": "3. You can view more detailed information and execute transactions in Sui wallet",
 		"ko": "3. Sui 지갑에서 자세한 내용을 확인하고 거래를 수행할 수 있습니다.",
 		"ja": "3.Suiウォレットで詳細を表示して取引を実行できます"
+	},
+	"je57im9": {
+		"zh-cn": "知识上链，成就永恒",
+		"en": "Knowledge on the blockchain, achieving eternity",
+		"ko": "지식이 사슬에 걸려, 성과는 영원하다.",
+		"ja": "知識の連鎖、永遠の成果"
+	},
+	"4tkkne1o": {
+		"zh-cn": "ChainLearn是一个区块链学习平台，通过AI出题和链上证书，让你的每一步学习成果都被永久记录，构建可信的能力档案。",
+		"en": "ChainLearn is a blockchain learning platform that uses AI generated questions and on chain certificates to permanently record every step of your learning and build a trusted competency profile.",
+		"ko": "ChainLearn은 AI 출제와 체인 인증서를 통해 각 단계의 학습 성과가 영구적으로 기록되도록 신뢰할 수 있는 역량 파일을 구축하는 블록체인 학습 플랫폼이다.",
+		"ja": "ChainLearnはブロックチェーン学習プラットフォームで、AIの出題とチェーン上の証明書を通じて、あなたの学習成果を永遠に記録し、信頼できる能力ファイルを構築します。"
+	},
+	"bvab7j1q": {
+		"zh-cn": "ChainLearn-X是一个区块链学习平台，通过AI出题和链上证书，让你的每一步学习成果都被永久记录，构建可信的能力档案。",
+		"en": "ChainLearn-X is a blockchain learning platform that uses AI generated questions and on chain certificates to permanently record every step of your learning and build a trusted competency profile.",
+		"ko": "ChainLearn-X는 AI 출제와 체인 인증서를 통해 모든 단계의 학습 성과를 영구적으로 기록하고 신뢰할 수 있는 능력 파일을 구축하는 블록체인 학습 플랫폼이다.",
+		"ja": "ChainLearn-Xはブロックチェーン学習プラットフォームで、AI出題とチェーン上証明書を通じて、あなたの学習成果を永遠に記録し、信頼できる能力ファイルを構築します。"
 	}
 }
