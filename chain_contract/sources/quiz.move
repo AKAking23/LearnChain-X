@@ -252,11 +252,11 @@ module chain_contract::quiz {
         }
         
         // 直接内联触发事件，避免linter错误
-        event::emit(QuestionAnswered {
-            user: user_record.user,
-            question_id,
-            is_correct
-        });
+        // event::emit(QuestionAnswered {
+        //     user: user_record.user,
+        //     question_id,
+        //     is_correct
+        // });
     }
 
     /**
@@ -300,7 +300,7 @@ module chain_contract::quiz {
             emit_solution_viewed(user_record.user, question_id, question.solution_cost);
             
             // 销毁扣除的积分代币
-            sui::balance::destroy_for_testing(burn_balance);
+            sui::balance::destroy_zero(burn_balance);
         }
         // 如果已经查看过，不需要再次支付
     }

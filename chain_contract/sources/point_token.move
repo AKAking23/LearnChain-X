@@ -243,7 +243,7 @@ module chain_contract::point_token {
         });
         
         // 销毁代币
-        balance::destroy_for_testing(burn_balance);
+        balance::destroy_zero(burn_balance);
     }
 
     /**
