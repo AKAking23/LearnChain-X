@@ -220,5 +220,125 @@
 		"en": "Popularize blockchain knowledge, cultivate blockchain technology talents, and promote the application of blockchain technology in various industries.",
 		"ko": "블록체인지식을 보급하고 블록체인기술인재를 양성하며 블록체인기술의 각 업종에서의 응용을 추진한다.",
 		"ja": "ブロックチェーン知識を普及させ、ブロックチェーン技術の人材を育成し、各業界におけるブロックチェーン技術の応用を推進する。"
+	},
+	"cvcu2v4": {
+		"zh-cn": "我的钱包",
+		"en": "my wallet",
+		"ko": "내 지갑",
+		"ja": "私の財布"
+	},
+	"j407p74": {
+		"zh-cn": "钱包连接",
+		"en": "Wallet connection",
+		"ko": "지갑 연결",
+		"ja": "ウォレット接続"
+	},
+	"ikk1174": {
+		"zh-cn": "连接钱包",
+		"en": "Connect wallet",
+		"ko": "지갑 연결",
+		"ja": "ウォレットの接続"
+	},
+	"j3pb8i4": {
+		"zh-cn": "钱包信息",
+		"en": "Wallet information",
+		"ko": "지갑 정보",
+		"ja": "ウォレット情報"
+	},
+	"d6kve3": {
+		"zh-cn": "地址:",
+		"en": "Address:",
+		"ko": "주소:",
+		"ja": "住所："
+	},
+	"cccwm3": {
+		"zh-cn": "余额:",
+		"en": "Balance:",
+		"ko": "잔액:",
+		"ja": "残高："
+	},
+	"27k1ha6": {
+		"zh-cn": "加载中...",
+		"en": "Loading",
+		"ko": "로드 중...",
+		"ja": "ロード中..."
+	},
+	"d3jite": {
+		"zh-cn": "请连接您的钱包以查看详细信息",
+		"en": "Please connect your wallet to view detailed information",
+		"ko": "자세한 내용을 보려면 지갑에 연결하십시오.",
+		"ja": "財布に接続して詳細を表示してください"
+	},
+	"dl4w3k4": {
+		"zh-cn": "最近交易",
+		"en": "RECENT TRANSACTIONS",
+		"ko": "최근 거래",
+		"ja": "最近の取引"
+	},
+	"n0g51q6": {
+		"zh-cn": "暂无交易记录",
+		"en": "No transaction records available at the moment",
+		"ko": "거래 기록 없음",
+		"ja": "トランザクションは一時的にありません"
+	},
+	"99puzt5": {
+		"zh-cn": "发送SUI",
+		"en": "Send SUI",
+		"ko": "SUI 보내기",
+		"ja": "SUIを送信"
+	},
+	"ng1spz5": {
+		"zh-cn": "接收地址:",
+		"en": "Receiving address:",
+		"ko": "수신 주소:",
+		"ja": "受信アドレス："
+	},
+	"7u3bqc9": {
+		"zh-cn": "金额 (SUI):",
+		"en": "Amount (SUI):",
+		"ko": "금액(SUI):",
+		"ja": "金額（SUI）："
+	},
+	"6kni416": {
+		"zh-cn": "发送中...",
+		"en": "Sending",
+		"ko": "보내는 중...",
+		"ja": "送信中..."
+	},
+	"ydxt5p5": {
+		"zh-cn": "交易成功!",
+		"en": "Successful trade!",
+		"ko": "거래 성공!",
+		"ja": "取引成功！"
+	},
+	"hd6r6e8": {
+		"zh-cn": "交易失败，请重试",
+		"en": "Transaction failed, please try again",
+		"ko": "거래 실패, 다시 시도하십시오.",
+		"ja": "取引に失敗しました。再試行してください"
+	},
+	"aisqn74": {
+		"zh-cn": "使用说明",
+		"en": "instructions",
+		"ko": "사용 설명",
+		"ja": "使用方法"
+	},
+	"wr0yq1m": {
+		"zh-cn": "1. 点击\"连接钱包\"按钮连接您的Sui钱包",
+		"en": "1. Click the \"Connect Wallet\" button to connect your Sui wallet",
+		"ko": "1.\"지갑 연결\"버튼을 클릭하여 Sui 지갑을 연결하십시오.",
+		"ja": "1.「ウォレットを接続する」ボタンをクリックしてSuiウォレットを接続します"
+	},
+	"tk5vvbo": {
+		"zh-cn": "2. 连接成功后，将显示您的钱包地址和SUI余额",
+		"en": "After successful connection, your wallet address and SUI balance will be displayed",
+		"ko": "2. 연결에 성공하면 지갑 주소와 SUI 잔액이 표시됩니다.",
+		"ja": "2.接続が成功すると、ウォレットアドレスとSUI残高が表示されます"
+	},
+	"chx5gbq": {
+		"zh-cn": "3. 您可以在Sui钱包中查看更多详细信息和执行交易",
+		"en": "3. You can view more detailed information and execute transactions in Sui wallet",
+		"ko": "3. Sui 지갑에서 자세한 내용을 확인하고 거래를 수행할 수 있습니다.",
+		"ja": "3.Suiウォレットで詳細を表示して取引を実行できます"
 	}
 }

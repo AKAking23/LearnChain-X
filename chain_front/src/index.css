@@ -184,3 +184,69 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* 钱包页面样式 */
+.wallet-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.wallet-connect-section {
+  margin-bottom: 30px;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.wallet-info {
+  margin-bottom: 30px;
+  background-color: #f0f8ff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-not-connected {
+  margin-bottom: 30px;
+  background-color: #fff0f0;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.wallet-info-section {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.wallet-info-section h2 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.wallet-info-section p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+/* 钱包链接样式 */
+.wallet-link {
+  display: inline-block;
+  margin-right: 15px;
+  padding: 8px 15px;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.wallet-link:hover {
+  background-color: #3a7bc8;
+}
