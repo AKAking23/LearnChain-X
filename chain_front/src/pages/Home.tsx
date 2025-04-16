@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import TypeWriter from "../components/TypeWriter";
+import Loading from '@/components/Loading';
 
 const Home: React.FC = () => {
   return (
@@ -14,20 +14,7 @@ const Home: React.FC = () => {
           />
         </p>
       </div>
-      <div className="navigation-links">
-        <Link to="/about" className="nav-link">
-          关于我们
-        </Link>
-        <Link to="/courses" className="nav-link">
-          课程列表
-        </Link>
-        <Link to="/dashboard" className="nav-link">
-          个人中心
-        </Link>
-        <Link to="/wallet" className="nav-link">
-          我的钱包
-        </Link>
-      </div>
+      <Loading onHideComplete={() => console.log('加载动画完成')} />
     </div>
   );
 };

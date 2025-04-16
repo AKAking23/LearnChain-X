@@ -11,7 +11,7 @@ const InnerLayout: React.FC = () => {
           <Link to="/">LearnChain-X</Link>
         </div>
         <nav className="main-nav">
-          <ConnectButton />
+          <ConnectButton style={{color:'#fff'}}/>
         </nav>
       </header>
 

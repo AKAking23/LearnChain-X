@@ -358,5 +358,11 @@
 		"en": "ChainLearn-X is a blockchain learning platform that uses AI generated questions and on chain certificates to permanently record every step of your learning and build a trusted competency profile.",
 		"ko": "ChainLearn-X는 AI 출제와 체인 인증서를 통해 모든 단계의 학습 성과를 영구적으로 기록하고 신뢰할 수 있는 능력 파일을 구축하는 블록체인 학습 플랫폼이다.",
 		"ja": "ChainLearn-Xはブロックチェーン学習プラットフォームで、AI出題とチェーン上証明書を通じて、あなたの学習成果を永遠に記録し、信頼できる能力ファイルを構築します。"
+	},
+	"ege0p3": {
+		"zh-cn": "已连接",
+		"en": "Connected",
+		"ko": "접속됨",
+		"ja": "接続済み"
 	}
 }

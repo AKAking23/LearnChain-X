@@ -31,6 +31,9 @@
   margin: 0;
   padding: 0;
 }
+.main-nav button{
+  background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
+}
 
 .main-nav a {
   color: #fff;
@@ -180,7 +183,7 @@ h1 {
 }
 
 /* 渐变色背景标题 */
-.gradient-bg-title{
+.gradient-bg-title {
   margin: 0 auto;
 }
 .gradient-bg-title h2 {
@@ -201,4 +204,13 @@ h1 {
   font-size: 1.2rem;
   color: #666;
   margin: 10px auto;
+}
+@media (max-width: 768px) {
+  .gradient-bg-title h2 {
+    font-size: 2.3rem;
+  }
+  .gradient-bg-title p {
+    width: 75%;
+    font-size: 1rem;
+  }
 }
