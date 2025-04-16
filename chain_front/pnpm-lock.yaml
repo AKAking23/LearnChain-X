@@ -92,7 +92,7 @@ importers:
         version: 6.2.5(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)
       vite-auto-i18n-plugin:
         specifier: ^1.0.23
-        version: 1.0.23
+        version: 1.0.23(encoding@0.1.13)
 
 packages:
 
@@ -1746,6 +1746,9 @@ packages:
   electron-to-chromium@1.5.135:
     resolution: {integrity: sha512-8gXUdEmvb+WCaYUhA0Svr08uSeRjM2w3x5uHOc1QbaEVzJXB8rgm5eptieXzyKoVEtinLvW6MtTcurA65PeS1Q==}
 
+  encoding@0.1.13:
+    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
+
   enhanced-resolve@5.18.1:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==}
     engines: {node: '>=10.13.0'}
@@ -1966,6 +1969,10 @@ packages:
   http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
+
+  iconv-lite@0.6.3:
+    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
+    engines: {node: '>=0.10.0'}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -2354,6 +2361,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  safer-buffer@2.1.2:
+    resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
   scheduler@0.26.0:
     resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
@@ -4106,11 +4116,11 @@ snapshots:
     dependencies:
       '@vanilla-extract/css': 1.17.1
 
-  '@vitalets/google-translate-api@9.2.1':
+  '@vitalets/google-translate-api@9.2.1(encoding@0.1.13)':
     dependencies:
       '@types/http-errors': 1.8.2
       http-errors: 2.0.0
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
@@ -4177,13 +4187,13 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  auto-i18n-plugin-core@1.0.23:
+  auto-i18n-plugin-core@1.0.23(encoding@0.1.13):
     dependencies:
       '@babel/core': 7.26.10
       '@babel/generator': 7.27.0
       '@babel/preset-env': 7.26.9(@babel/core@7.26.10)
       '@babel/preset-typescript': 7.27.0(@babel/core@7.26.10)
-      '@vitalets/google-translate-api': 9.2.1
+      '@vitalets/google-translate-api': 9.2.1(encoding@0.1.13)
       axios: 1.8.4
       crypto-js: 4.2.0
       tunnel: 0.0.6
@@ -4331,6 +4341,11 @@ snapshots:
       gopd: 1.2.0
 
   electron-to-chromium@1.5.135: {}
+
+  encoding@0.1.13:
+    dependencies:
+      iconv-lite: 0.6.3
+    optional: true
 
   enhanced-resolve@5.18.1:
     dependencies:
@@ -4591,6 +4606,11 @@ snapshots:
       statuses: 2.0.1
       toidentifier: 1.0.1
 
+  iconv-lite@0.6.3:
+    dependencies:
+      safer-buffer: 2.1.2
+    optional: true
+
   ignore@5.3.2: {}
 
   import-fresh@3.3.1:
@@ -4747,9 +4767,11 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  node-fetch@2.7.0:
+  node-fetch@2.7.0(encoding@0.1.13):
     dependencies:
       whatwg-url: 5.0.0
+    optionalDependencies:
+      encoding: 0.1.13
 
   node-releases@2.0.19: {}
 
@@ -4919,6 +4941,9 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
+  safer-buffer@2.1.2:
+    optional: true
+
   scheduler@0.26.0: {}
 
   semver@6.3.1: {}
@@ -5033,12 +5058,12 @@ snapshots:
 
   valibot@0.36.0: {}
 
-  vite-auto-i18n-plugin@1.0.23:
+  vite-auto-i18n-plugin@1.0.23(encoding@0.1.13):
     dependencies:
       '@babel/core': 7.26.10
       '@babel/preset-env': 7.26.9(@babel/core@7.26.10)
       '@babel/preset-typescript': 7.27.0(@babel/core@7.26.10)
-      auto-i18n-plugin-core: 1.0.23
+      auto-i18n-plugin-core: 1.0.23(encoding@0.1.13)
     transitivePeerDependencies:
       - debug
       - encoding

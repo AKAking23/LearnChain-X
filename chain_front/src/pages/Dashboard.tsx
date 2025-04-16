@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { useNavigate } from 'react-router-dom';
-import './Dashbord.module.css';
+import React, { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { useNavigate } from "react-router-dom";
+import "./Dashbord.css";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -19,14 +19,16 @@ const Dashboard: React.FC = () => {
   const infoRef = useRef<HTMLParagraphElement>(null);
   const animaterRef = useRef<gsap.core.Timeline | null>(null);
   const maxDistanceRef = useRef<number>(0);
-  
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) 
-    && !navigator.userAgent.includes('CriOS') 
-    && !(window as any).InstallTrigger;
+
+  const isSafari =
+    /^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
+    !navigator.userAgent.includes("CriOS") &&
+    !(window as any).InstallTrigger;
 
   // 重置welcome动画样式
   const reset = () => {
-    gsap.timeline()
+    gsap
+      .timeline()
       .set(lineRef.current, {
         scale: 0,
         opacity: 1,
@@ -42,7 +44,7 @@ const Dashboard: React.FC = () => {
       .set([navRef.current, infoRef.current], {
         opacity: 0,
       });
-    
+
     if (navRef.current) {
       navRef.current.classList.remove("welcome_nav_show");
     }
@@ -52,12 +54,13 @@ const Dashboard: React.FC = () => {
   const show = () => {
     // 动画播放器存在且正在播放动画：不执行函数，否则会因为动画冲突导致BUG
     if (animaterRef.current && animaterRef.current.isActive()) return;
-    
+
     reset(); // 重置
     setIsVisible(true); // 显示welcome
-    
+
     // 播放动画
-    animaterRef.current = gsap.timeline()
+    animaterRef.current = gsap
+      .timeline()
       .to(lineRef.current, {
         scale: 1,
         duration: 1.5,
@@ -106,11 +109,12 @@ const Dashboard: React.FC = () => {
   const hidden = (immediate?: () => void, next?: () => void) => {
     // 动画播放器存在且正在播放动画：不执行函数，否则会因为动画冲突导致BUG
     if (animaterRef.current && animaterRef.current.isActive()) return;
-    
+
     if (immediate) immediate(); // 存在立即执行代码，则立即执行
-    
+
     // 播放动画
-    animaterRef.current = gsap.timeline()
+    animaterRef.current = gsap
+      .timeline()
       .to(lineRef.current, {
         opacity: 0,
         duration: 0.8,
@@ -159,7 +163,7 @@ const Dashboard: React.FC = () => {
     // 更新距离:以屏幕中心为基准。将距离与屏幕尺寸绑定：避免不同尺寸下移动距离差异过大
     const distanceX = ((x - window.innerWidth / 2) / window.innerWidth) * 40;
     const distanceY = ((y - window.innerHeight / 2) / window.innerHeight) * 40;
-    
+
     // 移动标题
     gsap.to(titleRef.current, {
       x: `${distanceX}px`,
@@ -174,11 +178,17 @@ const Dashboard: React.FC = () => {
     // 更新距离:以屏幕中心为基准
     let distanceX = x - window.innerWidth / 2;
     let distanceY = y - window.innerHeight / 2;
-    
+
     // 限制移动边界
-    distanceX = Math.min(maxDistanceRef.current, Math.max(-maxDistanceRef.current, distanceX));
-    distanceY = Math.min(maxDistanceRef.current, Math.max(-maxDistanceRef.current, distanceY));
-    
+    distanceX = Math.min(
+      maxDistanceRef.current,
+      Math.max(-maxDistanceRef.current, distanceX)
+    );
+    distanceY = Math.min(
+      maxDistanceRef.current,
+      Math.max(-maxDistanceRef.current, distanceY)
+    );
+
     // 移动小球
     gsap.to(smallballsRefs.current, {
       x: `${distanceX}px`,
@@ -191,21 +201,21 @@ const Dashboard: React.FC = () => {
 
   // 导航函数替代全局存储的方法
   const startNewGame = () => {
-    hidden(undefined, () => navigate('/game/new'));
+    hidden(undefined, () => navigate("/game/new"));
   };
-  
+
   const continueGame = () => {
     if (playerActive) {
-      hidden(undefined, () => navigate('/game/continue'));
+      hidden(undefined, () => navigate("/game/continue"));
     }
   };
-  
+
   const showRank = () => {
-    hidden(undefined, () => navigate('/rank'));
+    hidden(undefined, () => navigate("/rank"));
   };
-  
+
   const showInstructions = () => {
-    hidden(undefined, () => navigate('/instructions'));
+    hidden(undefined, () => navigate("/instructions"));
   };
 
   // 调整尺寸
@@ -221,17 +231,17 @@ const Dashboard: React.FC = () => {
     // 这里可以添加从localStorage或API获取玩家状态的逻辑
     const checkPlayerActive = async () => {
       // 示例：检查localStorage中是否有玩家数据
-      const playerData = localStorage.getItem('playerData');
+      const playerData = localStorage.getItem("playerData");
       setPlayerActive(!!playerData);
     };
-    
+
     checkPlayerActive();
-    
+
     // 绑定相关事件
     const bindEvents = () => {
       const container = containerRef.current;
       const middle = middleRef.current;
-      
+
       if (container) {
         // 在界面范围内：标题文字跟随鼠标/手指偏移
         container.onmousemove = (e: MouseEvent) => {
@@ -248,7 +258,7 @@ const Dashboard: React.FC = () => {
           moveTitle(window.innerWidth / 2, window.innerHeight / 2);
         };
       }
-      
+
       if (middle) {
         // 在靠近中间内容的范围内：小球跟随鼠标/手指偏移，形成融球效果
         middle.onmousemove = (e: MouseEvent) => {
@@ -270,29 +280,32 @@ const Dashboard: React.FC = () => {
     // 初始化
     handleResize();
     bindEvents();
-    
+
     // 显示欢迎界面
     show();
 
     // 添加window的resize事件监听
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // 清理函数
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
-    <div className={`welcome _fullscreen ${!isVisible ? '_hidden' : ''}`} ref={containerRef}>
+    <div
+      className={`welcome _fullscreen ${!isVisible ? "_hidden" : ""}`}
+      ref={containerRef}
+    >
       <div className="welcome_middle" ref={middleRef}>
         <div className="welcome_middle_title" ref={titleRef}>
           <div>
-            {'SNAKE'.split('').map((letter, index) => (
-              <p 
-                className="_font_6" 
+            {"SNAKE".split("").map((letter, index) => (
+              <p
+                className="_font_6"
                 key={letter + index}
-                ref={el => {
+                ref={(el) => {
                   if (el && !titleLettersRefs.current.includes(el)) {
                     titleLettersRefs.current.push(el);
                   }
@@ -303,11 +316,11 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
           <div>
-            {'BALL'.split('').map((letter, index) => (
-              <p 
-                className="_font_6" 
+            {"BALL".split("").map((letter, index) => (
+              <p
+                className="_font_6"
                 key={letter + index}
-                ref={el => {
+                ref={(el) => {
                   if (el && !titleLettersRefs.current.includes(el)) {
                     titleLettersRefs.current.push(el);
                   }
@@ -322,20 +335,22 @@ const Dashboard: React.FC = () => {
           Let's bump up! dodge, bump, reset, and score!
         </p>
         {/* safari浏览器对css的filter适配不友好，这里检测到如果是safari浏览器，则取消滤镜融球效果 */}
-        <div 
-          className={`welcome_middle_balls ${!isSafari ? 'welcome_middle_balls_filter' : ''}`}
+        <div
+          className={`welcome_middle_balls ${
+            !isSafari ? "welcome_middle_balls_filter" : ""
+          }`}
           ref={ballsRef}
         >
-          <div 
+          <div
             className="welcome_middle_balls_big _middle_ball"
             ref={bigballRef}
           ></div>
           {[1, 1.5, 1.2].map((scale, index) => (
-            <div 
-              className="welcome_middle_balls_small" 
-              style={{ '--s': scale } as React.CSSProperties}
+            <div
+              className="welcome_middle_balls_small"
+              style={{ "--s": scale } as React.CSSProperties}
               key={index}
-              ref={el => {
+              ref={(el) => {
                 if (el && !smallballsRefs.current.includes(el)) {
                   smallballsRefs.current.push(el);
                 }
@@ -344,35 +359,59 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
         <svg className="welcome_middle_line" viewBox="0 0 50 50" ref={lineRef}>
-          <circle className="_dashed" cx="25" cy="25" r="25" vectorEffect="non-scaling-stroke" />
+          <circle
+            className="_dashed"
+            cx="25"
+            cy="25"
+            r="25"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
       </div>
       <div className="welcome_nav" ref={navRef}>
         <svg className="welcome_nav_line" viewBox="0 0 50 50">
-          <circle className="_dashed" cx="25" cy="25" r="25" vectorEffect="non-scaling-stroke" />
+          <circle
+            className="_dashed"
+            cx="25"
+            cy="25"
+            r="25"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
-        <div className="welcome_nav_selection" style={{ '--i': 0 } as React.CSSProperties}>
+        <div
+          className="welcome_nav_selection"
+          style={{ "--i": 0 } as React.CSSProperties}
+        >
           <div className="wns_node" onClick={startNewGame}>
             <div></div>
             <p className="_font_2">NEW GAME</p>
           </div>
         </div>
-        <div className="welcome_nav_selection" style={{ '--i': 1 } as React.CSSProperties}>
-          <div 
-            className={`wns_node ${!playerActive ? 'wns_unclickable' : ''}`}
+        <div
+          className="welcome_nav_selection"
+          style={{ "--i": 1 } as React.CSSProperties}
+        >
+          <div
+            className={`wns_node ${!playerActive ? "wns_unclickable" : ""}`}
             onClick={continueGame}
           >
             <div></div>
             <p className="_font_2">CONTINUE</p>
           </div>
         </div>
-        <div className="welcome_nav_selection" style={{ '--i': 2 } as React.CSSProperties}>
+        <div
+          className="welcome_nav_selection"
+          style={{ "--i": 2 } as React.CSSProperties}
+        >
           <div className="wns_node" onClick={showRank}>
             <div></div>
             <p className="_font_2">RANK</p>
           </div>
         </div>
-        <div className="welcome_nav_selection" style={{ '--i': 3 } as React.CSSProperties}>
+        <div
+          className="welcome_nav_selection"
+          style={{ "--i": 3 } as React.CSSProperties}
+        >
           <div className="wns_node" onClick={showInstructions}>
             <div></div>
             <p className="_font_2">INSTRUTION</p>
@@ -383,4 +422,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

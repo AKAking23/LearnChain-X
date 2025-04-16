@@ -9,12 +9,14 @@
 
 /* 头部导航 */
 .app-header {
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
+  background-color: transparent;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 999;
 }
 
 .logo a {
@@ -33,6 +35,10 @@
 }
 .main-nav button{
   background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
+  color: #fff !important;
+}
+.main-nav div{
+  color: #fff !important;
 }
 
 .main-nav a {

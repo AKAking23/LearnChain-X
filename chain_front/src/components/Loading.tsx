@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import "./Loading.css";
 import { ConnectModal, useCurrentAccount } from "@mysten/dapp-kit";
+import { useNavigate } from "react-router-dom";
 
 // 为window添加自定义属性声明
 declare global {
@@ -21,7 +22,7 @@ const Loading = ({ onHideComplete }: { onHideComplete: () => void }) => {
   const tipRef = useRef(null);
   const circleRef = useRef(null);
   const maskRef = useRef(null);
-
+  const navigate = useNavigate();
   // 使用gsap.core.Timeline类型
   let animater: gsap.core.Timeline | null = null;
 
@@ -141,6 +142,9 @@ const Loading = ({ onHideComplete }: { onHideComplete: () => void }) => {
         },
         "<"
       );
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
   };
 
   useEffect(() => {
@@ -163,7 +167,7 @@ const Loading = ({ onHideComplete }: { onHideComplete: () => void }) => {
       // 适当延迟一下执行，保证连接界面关闭
       setTimeout(() => {
         hideLoading();
-      }, 800);
+      }, 300);
     }
   }, [currentAccount]);
 
@@ -194,7 +198,18 @@ const Loading = ({ onHideComplete }: { onHideComplete: () => void }) => {
         <div className="loading_circle" ref={circleRef}></div>
         <ConnectModal
           trigger={
-            <p style={{zIndex:999,color:'#fff',fontSize:'1.2rem',fontWeight:'bold'}}> {currentAccount ? 'Connected' : 'Connect Wallet'}</p>
+            <p
+              style={{
+                zIndex: 999,
+                color: "#fff",
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              {" "}
+              {currentAccount ? "Connected" : "Connect Wallet"}
+            </p>
           }
           open={open}
           onOpenChange={(isOpen) => setOpen(isOpen)}
