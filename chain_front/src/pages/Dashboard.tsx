@@ -7,6 +7,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
   const [playerActive, setPlayerActive] = useState(false); // 替代globalStore.player.if_active
+  const [isMobile, setIsMobile] = useState(false); // 添加移动设备检测状态
   const containerRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -22,31 +23,30 @@ const Dashboard: React.FC = () => {
 
   const isSafari =
     /^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
-    !navigator.userAgent.includes("CriOS") &&
-    !(window as any).InstallTrigger;
+    !navigator.userAgent.includes("CriOS");
 
   // 重置welcome动画样式
   const reset = () => {
     gsap
       .timeline()
       .set(lineRef.current, {
-        scale: 0,
+        scale: 1,
         opacity: 1,
       })
       .set(ballsRef.current, {
-        scale: 0,
+        scale: 1,
         opacity: 1,
       })
       .set(titleLettersRefs.current, {
-        clipPath: "circle(0%)",
-        y: "50%",
+        clipPath: "circle(100%)",
+        y: 0,
       })
       .set([navRef.current, infoRef.current], {
-        opacity: 0,
+        opacity: 1,
       });
 
     if (navRef.current) {
-      navRef.current.classList.remove("welcome_nav_show");
+      navRef.current.classList.add("welcome_nav_show");
     }
   };
 
@@ -55,54 +55,11 @@ const Dashboard: React.FC = () => {
     // 动画播放器存在且正在播放动画：不执行函数，否则会因为动画冲突导致BUG
     if (animaterRef.current && animaterRef.current.isActive()) return;
 
-    reset(); // 重置
+    reset(); // 重置为最终状态
     setIsVisible(true); // 显示welcome
 
-    // 播放动画
-    animaterRef.current = gsap
-      .timeline()
-      .to(lineRef.current, {
-        scale: 1,
-        duration: 1.5,
-        ease: "power3.inOut",
-      })
-      .to(
-        ballsRef.current,
-        {
-          scale: 1,
-          duration: 1.5,
-          ease: "power3.inOut",
-        },
-        "<0.3"
-      )
-      .to(
-        titleLettersRefs.current,
-        {
-          clipPath: "circle(100%)",
-          y: 0,
-          duration: 0.8,
-          ease: "power3.out",
-          stagger: {
-            each: 0.05,
-            from: "random",
-          },
-        },
-        "<0.8"
-      )
-      .to(
-        [navRef.current, infoRef.current],
-        {
-          opacity: 1,
-          duration: 1.2,
-          ease: "power3.out",
-          onStart: () => {
-            // nav选项栏因为要适应不同尺寸以旋转，所以不能直接用gsap控制，否则无法响应旋转角度
-            // 这里只能用类名控制，welcome_nav_show会根据不同尺寸而通过媒体查询改变角度
-            navRef.current?.classList.add("welcome_nav_show");
-          },
-        },
-        "<"
-      );
+    // 不再播放从小到大的动画
+    animaterRef.current = gsap.timeline();
   };
 
   // 隐藏welcome
@@ -158,26 +115,37 @@ const Dashboard: React.FC = () => {
       );
   };
 
-  // 移动标题文字
+  // 移动标题文字，移动端和桌面端使用不同的移动距离
   const moveTitle = (x: number, y: number) => {
+    // 为移动设备调整移动距离
+    const factor = isMobile ? 20 : 40;
+    
     // 更新距离:以屏幕中心为基准。将距离与屏幕尺寸绑定：避免不同尺寸下移动距离差异过大
-    const distanceX = ((x - window.innerWidth / 2) / window.innerWidth) * 40;
-    const distanceY = ((y - window.innerHeight / 2) / window.innerHeight) * 40;
+    // const distanceX = ((x - window.innerWidth / 2) / window.innerWidth) * factor;
+    const distanceX = ((x - window.innerWidth / 3) / window.innerWidth) * factor;
+    // const distanceY = ((y - window.innerHeight / 2) / window.innerHeight) * factor;
+    const distanceY = ((y - window.innerHeight / 3) / window.innerHeight) * factor;
 
     // 移动标题
     gsap.to(titleRef.current, {
       x: `${distanceX}px`,
       y: `${distanceY}px`,
-      duration: 3,
+      duration: isMobile ? 2 : 3, // 移动设备上使用更短的动画时间
       ease: "power3.out",
     });
   };
 
-  // 移动小球
+  // 移动小球，也根据设备类型调整
   const moveSmallballs = (x: number, y: number) => {
     // 更新距离:以屏幕中心为基准
     let distanceX = x - window.innerWidth / 2;
     let distanceY = y - window.innerHeight / 2;
+
+    // 移动设备上缩小移动距离
+    if (isMobile) {
+      distanceX *= 0.5;
+      distanceY *= 0.5;
+    }
 
     // 限制移动边界
     distanceX = Math.min(
@@ -193,7 +161,7 @@ const Dashboard: React.FC = () => {
     gsap.to(smallballsRefs.current, {
       x: `${distanceX}px`,
       y: `${distanceY}px`,
-      duration: 1,
+      duration: isMobile ? 0.7 : 1, // 移动设备上使用更短的动画时间
       ease: "power3.out",
       stagger: 0.1,
     });
@@ -218,12 +186,20 @@ const Dashboard: React.FC = () => {
     hidden(undefined, () => navigate("/instructions"));
   };
 
+  // 检查是否是移动设备
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
+
   // 调整尺寸
   const handleResize = () => {
     if (bigballRef.current) {
       // 小球的移动范围局限在大球的周围
       maxDistanceRef.current = bigballRef.current.offsetWidth / 2.5;
     }
+    
+    // 检查设备类型
+    checkMobile();
   };
 
   useEffect(() => {
@@ -236,6 +212,9 @@ const Dashboard: React.FC = () => {
     };
 
     checkPlayerActive();
+    
+    // 初始化检查设备类型
+    checkMobile();
 
     // 绑定相关事件
     const bindEvents = () => {
@@ -301,7 +280,7 @@ const Dashboard: React.FC = () => {
       <div className="welcome_middle" ref={middleRef}>
         <div className="welcome_middle_title" ref={titleRef}>
           <div>
-            {"SNAKE".split("").map((letter, index) => (
+            {"MOVE".split("").map((letter, index) => (
               <p
                 className="_font_6"
                 key={letter + index}
@@ -316,7 +295,7 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
           <div>
-            {"BALL".split("").map((letter, index) => (
+            {"START".split("").map((letter, index) => (
               <p
                 className="_font_6"
                 key={letter + index}
@@ -332,7 +311,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <p className="welcome_middle_info _font_3" ref={infoRef}>
-          Let's bump up! dodge, bump, reset, and score!
+          The beloved technology growth platform of global geeks
         </p>
         {/* safari浏览器对css的filter适配不友好，这里检测到如果是safari浏览器，则取消滤镜融球效果 */}
         <div

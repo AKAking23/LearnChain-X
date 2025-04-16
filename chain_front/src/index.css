@@ -250,3 +250,13 @@ button:focus-visible {
 .wallet-link:hover {
   background-color: #3a7bc8;
 }
+
+/* 字体 */
+@font-face {
+  font-family: title;
+  src: url(@/assets/fonts/EricaOne-Regular.ttf);
+}
+@font-face {
+  font-family: content;
+  src: url(@/assets/fonts/RammettoOne-Regular.ttf);
+}
