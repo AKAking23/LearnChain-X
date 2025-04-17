@@ -9,12 +9,14 @@
 
 /* 头部导航 */
 .app-header {
-  background-color: #1a1a1a;
+  /* background-color: #ffffff; */
+  background-color: transparent;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 999;
 }
 
 .logo a {
@@ -30,6 +32,13 @@
   gap: 2rem;
   margin: 0;
   padding: 0;
+}
+.main-nav button{
+  background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
+  color: #fff !important;
+}
+.main-nav div{
+  color: #fff !important;
 }
 
 .main-nav a {
@@ -165,7 +174,7 @@ h1 {
 /* 媒体查询 - 响应式设计 */
 @media (max-width: 768px) {
   .app-header {
-    flex-direction: column;
+    /* flex-direction: column; */
     padding: 1rem;
   }
 
@@ -176,5 +185,38 @@ h1 {
 
   .courses-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 渐变色背景标题 */
+.gradient-bg-title {
+  margin: 0 auto;
+}
+.gradient-bg-title h2 {
+  font-size: 3rem;
+  font-weight: 800;
+  width: fit-content;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin: 0 auto;
+}
+.gradient-bg-title p {
+  width: 70%;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin: 10px auto;
+}
+@media (max-width: 768px) {
+  .gradient-bg-title h2 {
+    font-size: 2.3rem;
+  }
+  .gradient-bg-title p {
+    width: 75%;
+    font-size: 1rem;
   }
 }
