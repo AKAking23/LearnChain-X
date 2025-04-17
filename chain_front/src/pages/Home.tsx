@@ -1,7 +1,6 @@
 import React from "react";
 import TypeWriter from "../components/TypeWriter";
 import Loading from "@/components/Loading";
-import BackgroundBall from "@/components/BackgroundBall";
 const Home: React.FC = () => {
   return (
     <div className="home-page">
@@ -15,7 +14,6 @@ const Home: React.FC = () => {
         </p>
       </div>
       <Loading onHideComplete={() => console.log("加载动画完成")} />
-      <BackgroundBall />
     </div>
   );
 };

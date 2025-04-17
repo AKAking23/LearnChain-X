@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, Outlet } from "react-router-dom";
 import { ConnectButton } from "@mysten/dapp-kit";
+import BackgroundBall from "@/components/BackgroundBall";
 
 // 将Layout组件拆分为外层和内层组件
 const InnerLayout: React.FC = () => {
@@ -11,17 +12,14 @@ const InnerLayout: React.FC = () => {
           <Link to="/">LearnChain-X</Link>
         </div>
         <nav className="main-nav">
-          <ConnectButton style={{color:'#fff'}}/>
+          <ConnectButton style={{ color: "#fff" }} />
         </nav>
       </header>
 
       <main className="app-main">
         <Outlet />
+        <BackgroundBall />
       </main>
-
-      {/* <footer className="app-footer">
-        <p>&copy; {new Date().getFullYear()} LearnChain-X. 保留所有权利。</p>
-      </footer> */}
     </div>
   );
 };

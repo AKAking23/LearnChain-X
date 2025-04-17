@@ -75,10 +75,12 @@
   left: 0;
   bottom: 0;
   width: 40%;
+  /* color: var(--color_back); */
   color: var(--color_white);
   line-height: calc(var(--scale) * 3.5rem);
   mix-blend-mode: exclusion;
   z-index: 10;
+  font-family: title;
 }
 
 .welcome_middle_balls {
@@ -98,8 +100,10 @@
 
 .welcome_middle_balls_filter {
   filter: contrast(1000%);
-  background-color: var(--color_back);
+  /* background-color: var(--color_back); */
+  background-color: var(--color_white);
   mix-blend-mode: var(--mix);
+  opacity: 0.5;
 }
 
 .welcome_middle_balls_filter div {
@@ -254,7 +258,7 @@
 }
 
 ._font_3 {
-  font-size: calc(var(--scale) * 3rem);
+  font-size: calc(var(--scale) * 2rem);
 }
 
 ._font_6 {
@@ -265,8 +269,8 @@
 /* 定义全局CSS变量，通常会在根样式中定义 */
 :root {
   --color_white: #ffffff;
-  /* --color_front: #0a84ff; */
-  --color_front: #fff;
+  /* --color_front: #041a31; */
+  --color_front: #020432;
   --color_back: #000000;
   --color_gray: #a0a0a0;
   --mix: difference;
