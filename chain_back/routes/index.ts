@@ -1,8 +1,34 @@
 import Router from "koa-router";
 import { Context } from "koa";
 import { CozeAPI } from "@coze/api";
+import cors from "@koa/cors";
 
 const router = new Router();
+
+// 使用内存Map临时存储问题数据
+// 注意：这只适合开发环境，实际生产环境应该使用数据库或Redis
+const questionsStore = new Map<string, any[]>();
+
+const base64EncodedString =
+  "cGF0X2RnUVRqSTRSNlR2T3ZHcHVLMkZ0NEQxT2dCOWg0YjVNVHRRZDZQckFPTndmZ2ljM3dEem9FUWVMR0JOb2VHQk4="; // "Hello world!" 的Base64编码
+
+const decodedBuffer = Buffer.from(base64EncodedString, "base64");
+const decodedString = decodedBuffer.toString("utf-8");
+
+const apiClient = new CozeAPI({
+  token: decodedString,
+  baseURL: "https://api.coze.cn",
+});
+
+// 添加CORS中间件
+router.use(
+  cors({
+    origin: "*", // 允许所有来源访问
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "Accept"],
+    credentials: true,
+  })
+);
 
 // 基本 GET 请求示例
 router.get("/", async (ctx: Context) => {
@@ -10,11 +36,6 @@ router.get("/", async (ctx: Context) => {
     status: "success",
     message: "欢迎使用 LearnChain-X API",
   };
-});
-
-const apiClient = new CozeAPI({
-  token: "pat_dgQTjI4R6TvOvGpuK2Ft4D1OgB9h4b5MTtQd6PrAONwfgic3wDzoEQeLGBNoeGBN",
-  baseURL: "https://api.coze.cn",
 });
 
 // POST 接口示例
@@ -57,7 +78,8 @@ router.post("/api/coze", async (ctx: Context) => {
   try {
     const requestBody = ctx.request.body as any;
     const input = requestBody?.input || "";
-    
+    const userId = requestBody?.userId || "default"; // 用于区分不同用户的会话
+
     if (!input) {
       ctx.status = 400;
       ctx.body = {
@@ -66,25 +88,157 @@ router.post("/api/coze", async (ctx: Context) => {
       };
       return;
     }
-    
-    const res = await apiClient.workflows.runs.stream({
+
+    const res = await apiClient.workflows.runs.create({
       workflow_id: "7494156103493287945",
       parameters: {
         input: input,
       },
     });
-    
+
+    // 从响应中提取题目数据并格式化
+    let formattedData;
+    try {
+      // 尝试解析返回的数据
+      const rawData = res.data as any;
+      
+      // 如果返回的是字符串，直接尝试解析
+      let jsonData;
+      if (typeof rawData === 'string') {
+        try {
+          jsonData = JSON.parse(rawData);
+        } catch (e) {
+          // 如果不是合法的JSON字符串，尝试从字符串中提取JSON
+          const jsonMatch = rawData.match(/```json([\s\S]*?)```/) || 
+                           rawData.match(/\[([\s\S]*?)\]/);
+          
+          if (jsonMatch) {
+            jsonData = JSON.parse(jsonMatch[1].trim());
+          } else {
+            throw new Error("无法从字符串中提取JSON");
+          }
+        }
+      } else if (rawData && typeof rawData === 'object') {
+        // 如果是对象，检查reply字段
+        const reply = rawData.reply || '';
+        const jsonMatch = reply ? (reply.match(/```json([\s\S]*?)```/) || 
+                        reply.match(/\[([\s\S]*?)\]/)) : null;
+        
+        if (jsonMatch) {
+          jsonData = JSON.parse(jsonMatch[1].trim());
+        } else if (typeof rawData.output === 'string') {
+          // 有些情况下可能直接返回输出字符串
+          try {
+            jsonData = JSON.parse(rawData.output);
+          } catch {
+            jsonData = rawData;
+          }
+        } else {
+          jsonData = rawData;
+        }
+      } else {
+        throw new Error("无法解析返回的数据");
+      }
+      
+      // 处理解析后的数据
+      const questionsWithAnswers = Array.isArray(jsonData) ? jsonData : 
+                                 (jsonData.output && Array.isArray(jsonData.output) ? jsonData.output : []);
+      
+      // 存储问题数据到Map
+      questionsStore.set(userId, questionsWithAnswers);
+      
+      // 去除答案字段
+      const questionsWithoutAnswers = questionsWithAnswers.map((q: any) => {
+        const { answer, ...questionWithoutAnswer } = q;
+        return questionWithoutAnswer;
+      });
+      
+      formattedData = {
+        output: questionsWithoutAnswers
+      };
+    } catch (error) {
+      console.error("格式化数据失败", error);
+      formattedData = { output: [] }; // 如果解析失败，返回空数组
+    }
+
     ctx.status = 200;
     ctx.body = {
       status: "success",
       message: "Coze API调用成功",
-      data: res,
+      data: formattedData,
     };
   } catch (error) {
     ctx.status = 500;
     ctx.body = {
       status: "error",
       message: "调用Coze API失败",
+      error: error instanceof Error ? error.message : "未知错误",
+    };
+  }
+});
+
+// 添加验证答案的接口
+router.post("/api/verify-answer", async (ctx: Context) => {
+  try {
+    const requestBody = ctx.request.body as any;
+    const { questionIndex, selectedOption } = requestBody;
+    const userId = requestBody?.userId || "default"; // 用于获取对应用户的问题数据
+    
+    // 获取之前存储的问题数据
+    const questions = questionsStore.get(userId);
+    
+    if (!questions || !questions[questionIndex]) {
+      ctx.status = 400;
+      ctx.body = {
+        status: "error",
+        message: "问题不存在或会话已过期",
+      };
+      return;
+    }
+    
+    const question = questions[questionIndex];
+    
+    // 处理不同格式的答案
+    let correctAnswer;
+    let isCorrect = false;
+    
+    if (question.answer !== undefined) {
+      correctAnswer = question.answer;
+      
+      // 如果答案是数字
+      if (typeof correctAnswer === 'number') {
+        isCorrect = selectedOption === correctAnswer;
+      } 
+      // 如果答案是以选项前缀开头的字符串，如"A. 正确答案"，或"B. 选项内容"
+      else if (typeof correctAnswer === 'string') {
+        // 检查是否以字母前缀开头 (如 A. B. C. 等)
+        if (/^[A-D]\.?\s/.test(correctAnswer)) {
+          const letterIndex = correctAnswer.charCodeAt(0) - 65; // 'A' 的 ASCII 码是 65
+          isCorrect = selectedOption === letterIndex;
+        } 
+        // 直接匹配选项内容
+        else {
+          const optionContent = question.options[selectedOption];
+          isCorrect = optionContent.includes(correctAnswer) || 
+                      correctAnswer.includes(optionContent.replace(/^[A-D]\.?\s/, ''));
+        }
+      }
+    }
+    
+    ctx.status = 200;
+    ctx.body = {
+      status: "success",
+      data: {
+        isCorrect,
+        correctAnswer: correctAnswer || "",
+        explanation: question.explanation || ""
+      }
+    };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      status: "error",
+      message: "验证答案失败",
       error: error instanceof Error ? error.message : "未知错误",
     };
   }

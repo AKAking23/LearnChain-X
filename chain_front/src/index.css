@@ -260,3 +260,54 @@ button:focus-visible {
   font-family: content;
   src: url(@/assets/fonts/RammettoOne-Regular.ttf);
 }
+
+/* 测验横幅样式 */
+.quiz-banner {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.quiz-banner h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-banner p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.quiz-link {
+  display: inline-block;
+  background-color: white;
+  color: #2980b9;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.quiz-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 添加淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

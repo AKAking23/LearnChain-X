@@ -6,6 +6,7 @@ import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import Wallet from './pages/Wallet';
+import Quiz from './pages/Quiz';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: 'wallet',
         element: <Wallet />
+      },
+      {
+        path: 'quiz',
+        element: <Quiz />
       },
       {
         path: '*',

@@ -1,0 +1,251 @@
+/* 问答页面的主容器 */
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* 加载动画容器 */
+.quiz-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+
+/* 加载旋转动画 */
+.loading-spinner {
+  width: 80px;
+  height: 80px;
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #3498db;
+  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+  margin-bottom: 2rem;
+}
+
+/* 加载文字动画 */
+.loading-text {
+  font-size: 1.8rem;
+  color: #333;
+  animation: bounce 2s ease infinite;
+}
+
+/* 进度条 */
+.quiz-progress {
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* 问题标题样式 */
+.quiz-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.quiz-header h2 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.quiz-question h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #34495e;
+}
+
+/* 选项样式 */
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-option:hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.quiz-option.selected {
+  border-color: #3498db;
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.quiz-option.correct {
+  border-color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.1);
+}
+
+.quiz-option.incorrect {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.option-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+  margin-right: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.option-text {
+  flex: 1;
+}
+
+/* 按钮样式 */
+.quiz-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.quiz-actions button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-actions button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+/* 完成页面样式 */
+.quiz-completed {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.quiz-completed h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.quiz-completed p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #34495e;
+}
+
+.home-link {
+  display: inline-block;
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.home-link:hover {
+  background-color: #e0e0e0;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .quiz-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .quiz-option {
+    padding: 0.75rem;
+  }
+  
+  .loading-spinner {
+    width: 60px;
+    height: 60px;
+    border-width: 6px;
+  }
+  
+  .loading-text {
+    font-size: 1.5rem;
+  }
+} 

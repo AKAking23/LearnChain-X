@@ -364,5 +364,155 @@
 		"en": "Connected",
 		"ko": "접속됨",
 		"ja": "接続済み"
+	},
+	"g064o6y": {
+		"zh-cn": "请生成10道区块链相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 10 blockchain related multiple-choice questions, each with 4 options in JSON array format",
+		"ko": "10개의 블록체인 관련 선택 문제를 생성하십시오. 각 문제에는 4개의 옵션이 있습니다. 형식은 JSON 배열입니다.",
+		"ja": "10個のブロックチェーンに関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列をフォーマットしています"
+	},
+	"30goiob": {
+		"zh-cn": "无法解析返回的JSON",
+		"en": "Unable to parse the returned JSON",
+		"ko": "반환된 JSON을 확인할 수 없습니다.",
+		"ja": "戻されたJSONを解析できません"
+	},
+	"ghixcba": {
+		"zh-cn": "比特币的创始人是谁？",
+		"en": "Who is the founder of Bitcoin?",
+		"ko": "비트코인의 창시자는 누구입니까?",
+		"ja": "ビットコインの創始者は誰ですか。"
+	},
+	"tbnil4l": {
+		"zh-cn": "以太坊网络中用于支付计算资源的货币单位是？",
+		"en": "What is the currency unit used to pay for computing resources in the Ethereum network?",
+		"ko": "이더리움 네트워크에서 결제 계산 자원에 사용되는 화폐 단위는?",
+		"ja": "Ethernetネットワークで計算リソースを支払うために使用される通貨単位は？"
+	},
+	"5m1ovge": {
+		"zh-cn": "区块链的基本数据结构是什么？",
+		"en": "What is the basic data structure of blockchain?",
+		"ko": "블록체인의 기본 데이터 구조는 무엇입니까?",
+		"ja": "ブロックチェーンの基本的なデータ構造は何ですか。"
+	},
+	"q3ai2": {
+		"zh-cn": "链表",
+		"en": "Linked list",
+		"ko": "체인 테이블",
+		"ja": "チェーンメータ"
+	},
+	"hy6s2": {
+		"zh-cn": "数组",
+		"en": "array",
+		"ko": "배열",
+		"ja": "アレイ"
+	},
+	"cvsmc3": {
+		"zh-cn": "哈希表",
+		"en": "Hashtable",
+		"ko": "해시 시계",
+		"ja": "ハッシュテーブル"
+	},
+	"kdluls4": {
+		"zh-cn": "默克尔树",
+		"en": "Merkel tree",
+		"ko": "메르켈 트리",
+		"ja": "メルケルの木"
+	},
+	"eabzesc": {
+		"zh-cn": "一大波题库正在来临...",
+		"en": "A large wave of question banks is coming",
+		"ko": "큰 문제집이 오고 있는데...",
+		"ja": "大きな問題群が来ている…"
+	},
+	"l0ynuk5": {
+		"zh-cn": "测验完成！",
+		"en": "Test completed!",
+		"ko": "퀴즈 완료!",
+		"ja": "テスト完了！"
+	},
+	"wysk5o5": {
+		"zh-cn": "您的分数:",
+		"en": "Your score:",
+		"ko": "점수:",
+		"ja": "スコア:"
+	},
+	"itdrwu4": {
+		"zh-cn": "重新开始",
+		"en": "restart",
+		"ko": "다시 시작",
+		"ja": "再スタート"
+	},
+	"6jz6oz7": {
+		"zh-cn": "区块链知识测验",
+		"en": "Blockchain Knowledge Test",
+		"ko": "블록체인 지식 퀴즈",
+		"ja": "ブロックチェーン知識試験"
+	},
+	"qc8a2": {
+		"zh-cn": "问题",
+		"en": "problem",
+		"ko": "문제",
+		"ja": "問題"
+	},
+	"dng21l4": {
+		"zh-cn": "检查答案",
+		"en": "check the answers",
+		"ko": "답안 검토",
+		"ja": "答えをチェック"
+	},
+	"btmg33": {
+		"zh-cn": "下一题",
+		"en": "Next question",
+		"ko": "다음 문제",
+		"ja": "次の問題"
+	},
+	"bykzad4": {
+		"zh-cn": "完成测验",
+		"en": "Complete the quiz",
+		"ko": "퀴즈 완료",
+		"ja": "テストを完了する"
+	},
+	"9uocz89": {
+		"zh-cn": "测试你的区块链知识",
+		"en": "Test your blockchain knowledge",
+		"ko": "블록체인 지식 테스트",
+		"ja": "ブロックチェーンの知識をテスト"
+	},
+	"jhg3zwn": {
+		"zh-cn": "完成我们的区块链选择题测验，检验你的学习成果！",
+		"en": "Complete our blockchain multiple-choice test to test your learning outcomes!",
+		"ko": "우리의 블록체인 선택 문제 퀴즈를 완성하고, 당신의 학습 성과를 검증합니다!",
+		"ja": "私たちのブロックチェーン選択問題のテストを完了して、あなたの学習成果を検証します！"
+	},
+	"cd1tws4": {
+		"zh-cn": "开始测验",
+		"en": "Start the test",
+		"ko": "퀴즈 시작",
+		"ja": "テストを開始"
+	},
+	"i7bwwmx": {
+		"zh-cn": "请生成3道区块链相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 3 blockchain related multiple-choice questions, each with 4 options in JSON array format",
+		"ko": "3개의 블록체인 관련 선택 문제를 생성하십시오. 각 문제에는 4개의 옵션이 있습니다. 형식은 JSON 배열입니다.",
+		"ja": "3つのブロックチェーンに関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列の形式になっています"
+	},
+	"v1slm48": {
+		"zh-cn": "加载题目中...",
+		"en": "Loading the title",
+		"ko": "제목 로드 중...",
+		"ja": "タイトルをロード中..."
+	},
+	"fonrv77": {
+		"zh-cn": "✓ 回答正确!",
+		"en": "✓ Correct answer!",
+		"ko": "♦ 정답!",
+		"ja": "＄正解！"
+	},
+	"3jc4307": {
+		"zh-cn": "✗ 回答错误!",
+		"en": "✗ Incorrect answer!",
+		"ko": "땡 땡!",
+		"ja": "❝答えが間違っている！"
 	}
 }
