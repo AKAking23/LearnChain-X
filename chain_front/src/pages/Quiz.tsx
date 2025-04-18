@@ -40,7 +40,7 @@ const Quiz: React.FC = () => {
         } else {
           // 如果没有缓存，则调用API获取题目
           const response = await sendMessageToCoze({
-            input: "请生成3道区块链相关的选择题，每道题有4个选项，格式为JSON数组",
+            input: "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
             userId: userId
           });
           

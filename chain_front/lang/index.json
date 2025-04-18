@@ -514,5 +514,11 @@
 		"en": "✗ Incorrect answer!",
 		"ko": "땡 땡!",
 		"ja": "❝答えが間違っている！"
+	},
+	"jbaeav12": {
+		"zh-cn": "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 3 multiple-choice questions related to the beginner Move language, each with 4 options in JSON array format",
+		"ko": "JSON 배열 형식으로 4개의 옵션이 있는 3개의 기본 Move 언어 관련 선택 문제를 생성하십시오.",
+		"ja": "3つの初級Move言語に関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列の形式になっています"
 	}
 }

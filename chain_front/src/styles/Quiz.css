@@ -7,6 +7,8 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   animation: fadeIn 0.5s ease-in-out;
+  position: relative;
+  z-index: 999;
 }
 
 /* 加载动画容器 */
@@ -184,6 +186,10 @@
 
 .home-link:hover {
   background-color: #e0e0e0;
+}
+.explanation-text{
+  margin: 20px 0;
+  color: #666;
 }
 
 /* 动画效果 */
