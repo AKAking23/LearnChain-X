@@ -532,3 +532,87 @@ public fun is_answer_correct(user_record: &UserAnswerRecord, question_id: u64): 
 public fun has_viewed_solution(user_record: &UserAnswerRecord, question_id: u64): bool {
     table::contains(&user_record.viewed_solutions, question_id)
 }
+
+/**
+ * 添加新问题（不包含答案和解析）
+ * 只上传问题内容和选项，不上传答案和解析，适用于前端验证答案的场景
+ * @param registry - 问题注册表
+ * @param content - 问题内容
+ * @param options - 问题选项
+ * @param ctx - 交易上下文
+ * @return 新问题的ID
+ */
+public entry fun add_question_without_solution(
+    registry: &mut QuestionRegistry,
+    content: String,
+    options: vector<String>,
+    ctx: &mut TxContext,
+): u64 {
+    // 创建问题对象，使用占位符值
+    let question = Question {
+        id: object::new(ctx),
+        content,
+        options,
+        correct_answer: 0, // 占位符，不存储真实答案
+        points_reward: 0,  // 不设置奖励
+        solution_cost: 0,  // 不设置解析费用
+        solution: string::utf8(b""), // 空解析
+    };
+
+    // 获取并保存问题ID
+    let question_id = registry.next_question_id;
+
+    // 添加到问题列表
+    table::add(&mut registry.questions, question_id, question);
+
+    // 更新下一个问题ID（自增）
+    registry.next_question_id = question_id + 1;
+
+    // 发出问题创建事件
+    emit_question_created(question_id, content, 0);
+    
+    // 返回问题ID
+    question_id
+}
+
+/**
+ * 添加简化问题（只有内容，没有选项、答案和解析）
+ * 适用于前端处理选项和验证答案的场景
+ * @param registry - 问题注册表
+ * @param content - 问题内容
+ * @param ctx - 交易上下文
+ * @return 新问题的ID
+ */
+public entry fun add_simple_question(
+    registry: &mut QuestionRegistry,
+    content: String,
+    ctx: &mut TxContext,
+): u64 {
+    // 创建问题对象，使用空选项和占位符值
+    let empty_options = vector::empty<String>();
+    
+    let question = Question {
+        id: object::new(ctx),
+        content,
+        options: empty_options,
+        correct_answer: 0, // 占位符，不存储真实答案
+        points_reward: 0,  // 不设置奖励
+        solution_cost: 0,  // 不设置解析费用
+        solution: string::utf8(b""), // 空解析
+    };
+
+    // 获取并保存问题ID
+    let question_id = registry.next_question_id;
+
+    // 添加到问题列表
+    table::add(&mut registry.questions, question_id, question);
+
+    // 更新下一个问题ID（自增）
+    registry.next_question_id = question_id + 1;
+
+    // 发出问题创建事件
+    emit_question_created(question_id, content, 0);
+    
+    // 返回问题ID
+    question_id
+}

@@ -5,14 +5,21 @@ import {
   verifyAnswer,
   getQuestionSolution,
 } from "../api/coze";
-import { createDirectRewardParams } from "../api/sui";
+import {
+  createDirectRewardParams,
+  createViewSolutionTransaction,
+  createAddSimpleQuestionParams,
+  CONTRACT_ADDRESS,
+} from "../api/sui";
 import "../styles/Quiz.css"; // 需要创建这个CSS文件
-import { TESTNET_QUIZMANAGER_ID } from "@/utils/constants";
+import { TESTNET_QUIZMANAGER_ID, TESTNET_REGISTRY_ID } from "@/utils/constants";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
+  useSuiClient,
 } from "@mysten/dapp-kit";
 import { Button } from "@/components/ui/button";
+
 interface QuizQuestion {
   id?: number;
   question: string;
@@ -37,6 +44,131 @@ const Quiz: React.FC = () => {
 
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const [userCoinId, setUserCoinId] = useState<string | null>(null);
+  const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
+  const [solutionIds] = useState<{ [key: number]: string }>({});
+
+  // 获取用户代币ID和余额的函数
+  const getUserCoinId = async (address: string) => {
+    try {
+      if (!address) return null;
+
+      // 获取用户拥有的所有代币
+      const coins = await suiClient.getCoins({
+        owner: address,
+        coinType: `${CONTRACT_ADDRESS}::point_token::POINT_TOKEN`,
+      });
+      console.log(coins, "coins----");
+
+      // 如果用户有代币，返回第一个代币的ID
+      if (coins && coins.data && coins.data.length > 0) {
+        // 计算总余额
+        let totalBalance = 0n;
+        for (const coin of coins.data) {
+          if (coin.balance) {
+            totalBalance += BigInt(coin.balance);
+          }
+        }
+
+        // 更新余额状态（转换为可读格式，假设代币有9位小数）
+        const formattedBalance = formatTokenBalance(totalBalance);
+        setUserTokenBalance(formattedBalance);
+
+        return coins.data[0].coinObjectId;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("获取用户代币失败:", error);
+      return null;
+    }
+  };
+
+  // 格式化代币余额的辅助函数
+  const formatTokenBalance = (balance: bigint): string => {
+    const decimals = 9; // 假设代币有9位小数
+    const divisor = BigInt(10 ** decimals);
+
+    if (balance === 0n) return "0";
+
+    const integerPart = balance / divisor;
+    const fractionalPart = balance % divisor;
+
+    if (fractionalPart === 0n) {
+      return integerPart.toString();
+    }
+
+    // 确保小数部分有正确的前导零
+    let fractionalStr = fractionalPart.toString().padStart(decimals, "0");
+    // 移除尾部的0
+    fractionalStr = fractionalStr.replace(/0+$/, "");
+
+    return `${integerPart}.${fractionalStr}`;
+  };
+
+  // 手动刷新代币余额
+  const refreshTokenBalance = async () => {
+    if (currentAccount) {
+      await getUserCoinId(currentAccount.address);
+    }
+  };
+
+  // 获取解析对象ID的函数
+  const getSolutionId = async (questionId: number): Promise<string | null> => {
+    try {
+      // 这里应该通过链上查询获取对应问题的解析对象ID
+      // 实际实现需要根据实际存储方式定制
+      // 这里仅作为示例，返回缓存或默认值
+      if (solutionIds[questionId]) {
+        return solutionIds[questionId];
+      }
+
+      // TODO: 实现从链上获取解析对象ID的逻辑
+      // 从链上获取解析对象ID
+      const objects = await suiClient.getOwnedObjects({
+        owner: "0x0", // 共享对象的所有者通常是0x0
+        filter: {
+          StructType: `${CONTRACT_ADDRESS}::point_token::SolutionContent`,
+        },
+        options: {
+          showContent: true,
+        },
+      });
+
+      // 找到匹配questionId的SolutionContent对象
+      for (const obj of objects.data || []) {
+        if (obj.data) {
+          const content = obj.data.content;
+          if (content && "fields" in content) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const fields = content.fields as Record<string, any>;
+            if (fields.question_id === questionId) {
+              return obj.data.objectId;
+            }
+          }
+        }
+      }
+
+      // 如果没有找到，返回null
+      return null;
+    } catch (error) {
+      console.error("获取解析对象ID失败:", error);
+      return null;
+    }
+  };
+
+  // 在组件挂载和用户账户变更时获取用户代币ID和余额
+  useEffect(() => {
+    if (currentAccount) {
+      getUserCoinId(currentAccount.address).then((coinId) => {
+        setUserCoinId(coinId);
+      });
+    } else {
+      setUserTokenBalance("0"); // 重置余额
+      setUserCoinId(null);
+    }
+  }, [currentAccount]);
 
   useEffect(() => {
     const fetchQuizQuestions = async () => {
@@ -212,13 +344,64 @@ const Quiz: React.FC = () => {
       if (result.status === "success") {
         // 设置答案结果
         setAnswerResult({
-          isCorrect: selectedOption !== null && 
-                     isCorrectOption(result.data.answer, selectedOption, result.data.correctOptionLetter),
+          isCorrect:
+            selectedOption !== null &&
+            isCorrectOption(
+              result.data.answer,
+              selectedOption,
+              result.data.correctOptionLetter
+            ),
           correctAnswer: result.data.answer,
           correctOptionLetter: result.data.correctOptionLetter,
-          explanation: result.data.explanation
+          explanation: result.data.explanation,
         });
         setShowAnswer(true);
+
+        // 如果用户已登录，调用合约消耗积分查看解析
+        if (currentAccount) {
+          try {
+            // 获取当前问题ID
+            const questionId =
+              questions[currentQuestionIndex].id || currentQuestionIndex;
+            console.log(questionId, "questionId---");
+
+            // 获取解析对象ID
+            const solutionId = await getSolutionId(questionId);
+            console.log(solutionId, "solutionId---");
+
+            // 如果没有用户代币ID，重新获取
+            if (!userCoinId) {
+              const coinId = await getUserCoinId(currentAccount.address);
+              setUserCoinId(coinId);
+            }
+
+            // 如果成功获取了必要的ID，进行交易
+            if (solutionId && userCoinId) {
+              // 创建交易
+              const transaction = createViewSolutionTransaction(
+                solutionId,
+                userCoinId
+              );
+
+              // 执行交易
+              signAndExecuteTransaction(
+                { transaction },
+                {
+                  onSuccess: (result) => {
+                    console.log("查看解析成功!", result);
+                  },
+                  onError: (error) => {
+                    console.error("查看解析失败:", error);
+                  },
+                }
+              );
+            } else {
+              console.log("缺少必要的ID信息，跳过链上交易");
+            }
+          } catch (error) {
+            console.error("调用合约查看解析失败:", error);
+          }
+        }
       }
     } catch (error) {
       console.error("获取答案解析失败", error);
@@ -232,6 +415,42 @@ const Quiz: React.FC = () => {
     setQuizCompleted(false);
     setShowAnswer(false);
     setAnswerResult(null);
+  };
+
+  // 添加简化问题到链上的示例函数
+  const handleAddSimpleQuestion = async () => {
+    if (!currentAccount) {
+      console.error("用户未登录");
+      return;
+    }
+
+    try {
+      // 这里应该获取问题注册表ID
+      const registryId = TESTNET_REGISTRY_ID; // 使用测试网络的注册表ID
+
+      // 创建一个问题示例
+      const question = {
+        content:
+          "Move语言中，以下哪个关键字用于声明模块？\nA. struct\nB. resource\nC. module\nD. function",
+      };
+
+      // 使用签名执行交易的mutate方法来添加问题
+      signAndExecuteTransaction(
+        createAddSimpleQuestionParams(registryId, question.content),
+        {
+          onSuccess: (result) => {
+            console.log("简化问题添加成功!", result);
+            // 这里可以解析返回的结果获取问题ID
+            // 前端自己存储选项和正确答案，不上传到链上
+          },
+          onError: (error) => {
+            console.error("简化问题添加失败:", error);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("添加简化问题失败:", error);
+    }
   };
 
   if (loading) {
@@ -274,6 +493,33 @@ const Quiz: React.FC = () => {
 
   return (
     <div className="quiz-container">
+      {/* 显示用户代币余额 */}
+      {currentAccount && (
+        <div
+          className="token-balance"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "20px",
+            background: "#f0f0f0",
+            padding: "5px 10px",
+            borderRadius: "5px",
+            fontSize: "14px",
+          }}
+        >
+          <p>
+            积分余额: <strong>{userTokenBalance}</strong> POINT
+          </p>
+          <Button
+            onClick={refreshTokenBalance}
+            size="sm"
+            style={{ marginLeft: "5px", padding: "2px 5px", fontSize: "12px" }}
+          >
+            刷新
+          </Button>
+        </div>
+      )}
+
       <div className="quiz-progress">
         <div
           className="progress-bar"
@@ -302,7 +548,11 @@ const Quiz: React.FC = () => {
                           ${
                             showAnswer &&
                             answerResult &&
-                            isCorrectOption(answerResult.correctAnswer, index, answerResult.correctOptionLetter)
+                            isCorrectOption(
+                              answerResult.correctAnswer,
+                              index,
+                              answerResult.correctOptionLetter
+                            )
                               ? "correct"
                               : ""
                           } 
@@ -328,7 +578,9 @@ const Quiz: React.FC = () => {
           <div className="answer-explanation">
             <p>{answerResult.isCorrect ? "✓ 回答正确!" : "✗ 回答错误!"}</p>
             {answerResult.correctOptionLetter && (
-              <p className="correct-answer">正确答案：{answerResult.correctOptionLetter}</p>
+              <p className="correct-answer">
+                正确答案：{answerResult.correctOptionLetter}
+              </p>
             )}
             {answerResult.explanation && (
               <p className="explanation-text">{answerResult.explanation}</p>
@@ -350,6 +602,22 @@ const Quiz: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 添加问题按钮，仅在开发环境显示 */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="admin-buttons"
+          style={{ marginTop: "20px", display: "flex", gap: "10px" }}
+        >
+          <Button
+            onClick={handleAddSimpleQuestion}
+            className="admin-button"
+            style={{ background: "#2196F3" }}
+          >
+            添加简化问题（不含答案和解析）
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -365,7 +633,7 @@ const isCorrectOption = (
     const letterIndex = correctOptionLetter.charCodeAt(0) - 65; // 'A'的ASCII码是65
     return optionIndex === letterIndex;
   }
-  
+
   // 以下是原有逻辑，作为备选判断方式
   if (typeof correctAnswer === "number") {
     return optionIndex === correctAnswer;
