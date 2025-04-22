@@ -468,23 +468,14 @@ const Quiz: React.FC = () => {
       {currentAccount && (
         <div
           className="token-balance"
-          style={{
-            position: "absolute",
-            top: "10px",
-            right: "20px",
-            background: "#f0f0f0",
-            padding: "5px 10px",
-            borderRadius: "5px",
-            fontSize: "14px",
-          }}
         >
           <p>
             积分余额: <strong>{userTokenBalance}</strong> POINT
           </p>
           <Button
             onClick={refreshTokenBalance}
+            className="reflesh-button"
             size="sm"
-            style={{ marginLeft: "5px", padding: "2px 5px", fontSize: "12px" }}
           >
             刷新
           </Button>
