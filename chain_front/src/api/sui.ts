@@ -62,11 +62,13 @@ export function createDirectRewardTransaction(
 /**
  * 创建交易对象用于查看题目解析（使用简化方法）
  * 调用新添加的view_solution_simple方法，不需要传入问题ID
+ * @param quizManagerId - Quiz管理器ID
  * @param payment - 用户积分代币ID
  * @param amount - 要销毁的积分数量
  * @returns 交易对象
  */
 export function createViewSolutionSimpleTransaction(
+  quizManagerId: string,
   payment: string,
   amount: number
 ): Transaction {
@@ -75,6 +77,7 @@ export function createViewSolutionSimpleTransaction(
   tx.moveCall({
     target: `${CONTRACT_ADDRESS}::quiz::view_solution_simple`,
     arguments: [
+      tx.object(quizManagerId), // Quiz管理器实例
       tx.object(payment), // 用户的代币ID
       tx.pure.u64(amount), // 要销毁的积分数量
     ],

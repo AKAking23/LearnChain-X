@@ -187,7 +187,7 @@ const Quiz: React.FC = () => {
           // 模拟加载时间，给loading动画一些展示时间
           setTimeout(() => {
             setLoading(false);
-          }, 2000);
+          }, 1000);
         }
       } catch (error) {
         console.error("获取题目失败", error);
@@ -274,7 +274,7 @@ const Quiz: React.FC = () => {
                   console.log("奖励积分成功!", result);
                   setTimeout(() => {
                     refreshTokenBalance();
-                  }, 2000);
+                  }, 1000);
                 },
                 onError: (error) => {
                   console.error("奖励积分失败:", error);
@@ -309,6 +309,7 @@ const Quiz: React.FC = () => {
 
             // 创建交易，使用简化的方法
             const transaction = createViewSolutionSimpleTransaction(
+              TESTNET_QUIZMANAGER_ID,
               userCoinId,
               amount
             );

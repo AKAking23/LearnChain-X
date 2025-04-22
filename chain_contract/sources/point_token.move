@@ -379,6 +379,20 @@ public entry fun mint_tokens(
     });
 }
 
+/**
+ * 销毁用户代币
+ * 用户可以将自己的代币销毁
+ * @param manager - Quiz管理器
+ * @param coin - 要销毁的代币
+ */
+public entry fun burn_tokens(
+    manager: &mut QuizManager,
+    coin: Coin<POINT_TOKEN>,
+) {
+    // 销毁代币
+    coin::burn(&mut manager.treasury_cap, coin);
+}
+
 // Getter 函数
 public fun get_question_content(question: &Question): string::String {
     question.content
