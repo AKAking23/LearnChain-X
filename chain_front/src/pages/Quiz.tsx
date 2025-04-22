@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { sendMessageToCoze, verifyAnswer } from "../api/coze";
+import {
+  sendMessageToCoze,
+  verifyAnswer,
+  getQuestionSolution,
+} from "../api/coze";
 import { createDirectRewardParams } from "../api/sui";
 import "../styles/Quiz.css"; // 需要创建这个CSS文件
 import { TESTNET_QUIZMANAGER_ID } from "@/utils/constants";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
-
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+} from "@mysten/dapp-kit";
+import { Button } from "@/components/ui/button";
 interface QuizQuestion {
   id?: number;
   question: string;
@@ -24,9 +31,10 @@ const Quiz: React.FC = () => {
   const [answerResult, setAnswerResult] = useState<{
     isCorrect: boolean;
     correctAnswer: string | number;
+    correctOptionLetter?: string;
     explanation?: string;
   } | null>(null);
-  
+
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
@@ -106,21 +114,22 @@ const Quiz: React.FC = () => {
   const getDefaultQuestions = (): QuizQuestion[] => {
     return [
       {
-        question: "比特币的创始人是谁？",
-        options: [
-          "Vitalik Buterin",
-          "Satoshi Nakamoto",
-          "Charles Hoskinson",
-          "Gavin Wood",
-        ],
+        explanation:
+          "Move语言是由Facebook的子公司Novi Financial开发的，用于其数字货币项目Diem（原Libra）的智能合约编程语言。",
+        options: ["A. Google", "B. Facebook", "C. Microsoft", "D. Apple"],
+        question: "Move语言是由哪个组织开发的？",
       },
       {
-        question: "以太坊网络中用于支付计算资源的货币单位是？",
-        options: ["Ether", "Gas", "Wei", "Gwei"],
+        explanation:
+          "Move语言是一种静态类型的编程语言，它强调类型安全性和资源管理，特别适合编写智能合约。",
+        options: ["A. 面向对象", "B. 静态类型", "C. 动态类型", "D. 过程式"],
+        question: "Move语言的主要特点是什么？",
       },
       {
-        question: "区块链的基本数据结构是什么？",
-        options: ["链表", "数组", "哈希表", "默克尔树"],
+        explanation:
+          "在Move语言中，使用关键字'resource'来声明资源，资源是一种特殊的结构体，它代表在Move中具有持久存在的数据。",
+        options: ["A. struct", "B. resource", "C. module", "D. fun"],
+        question: "在Move语言中，以下哪个关键字用于声明资源？",
       },
     ];
   };
@@ -156,7 +165,7 @@ const Quiz: React.FC = () => {
       if (result.status === "success") {
         setAnswerResult(result.data);
         setShowAnswer(true);
-        
+
         // 如果答案正确，增加分数并调用合约奖励用户
         if (result.data.isCorrect && currentAccount) {
           setScore(score + 1);
@@ -164,7 +173,7 @@ const Quiz: React.FC = () => {
           try {
             // 奖励积分数量
             const rewardAmount = 1000000000;
-            
+
             // 使用useSignAndExecuteTransaction的mutate方法执行交易
             signAndExecuteTransaction(
               createDirectRewardParams(
@@ -178,7 +187,7 @@ const Quiz: React.FC = () => {
                 },
                 onError: (error) => {
                   console.error("奖励积分失败:", error);
-                }
+                },
               }
             );
           } catch (walletError) {
@@ -189,6 +198,30 @@ const Quiz: React.FC = () => {
     } catch (error) {
       console.error("验证答案失败", error);
       setShowAnswer(true);
+    }
+  };
+
+  const handleViewSolution = async () => {
+    try {
+      const userId = localStorage.getItem("userId") || "default";
+      const result = await getQuestionSolution({
+        questionIndex: currentQuestionIndex,
+        userId: userId,
+      });
+
+      if (result.status === "success") {
+        // 设置答案结果
+        setAnswerResult({
+          isCorrect: selectedOption !== null && 
+                     isCorrectOption(result.data.answer, selectedOption, result.data.correctOptionLetter),
+          correctAnswer: result.data.answer,
+          correctOptionLetter: result.data.correctOptionLetter,
+          explanation: result.data.explanation
+        });
+        setShowAnswer(true);
+      }
+    } catch (error) {
+      console.error("获取答案解析失败", error);
     }
   };
 
@@ -269,7 +302,7 @@ const Quiz: React.FC = () => {
                           ${
                             showAnswer &&
                             answerResult &&
-                            isCorrectOption(answerResult.correctAnswer, index)
+                            isCorrectOption(answerResult.correctAnswer, index, answerResult.correctOptionLetter)
                               ? "correct"
                               : ""
                           } 
@@ -294,6 +327,9 @@ const Quiz: React.FC = () => {
         {showAnswer && answerResult && (
           <div className="answer-explanation">
             <p>{answerResult.isCorrect ? "✓ 回答正确!" : "✗ 回答错误!"}</p>
+            {answerResult.correctOptionLetter && (
+              <p className="correct-answer">正确答案：{answerResult.correctOptionLetter}</p>
+            )}
             {answerResult.explanation && (
               <p className="explanation-text">{answerResult.explanation}</p>
             )}
@@ -302,14 +338,15 @@ const Quiz: React.FC = () => {
 
         <div className="quiz-actions">
           {selectedOption !== null && !showAnswer && (
-            <button onClick={handleCheckAnswer}>检查答案</button>
+            <Button onClick={handleCheckAnswer}>检查答案</Button>
           )}
+          <Button onClick={handleViewSolution}>答案与解析</Button>
           {showAnswer && (
-            <button onClick={handleNextQuestion}>
+            <Button onClick={handleNextQuestion}>
               {currentQuestionIndex < questions.length - 1
                 ? "下一题"
                 : "完成测验"}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -320,8 +357,16 @@ const Quiz: React.FC = () => {
 // 辅助函数，判断选项是否为正确选项
 const isCorrectOption = (
   correctAnswer: string | number,
-  optionIndex: number
+  optionIndex: number,
+  correctOptionLetter?: string
 ): boolean => {
+  // 如果有提供correctOptionLetter，优先使用字母判断
+  if (correctOptionLetter) {
+    const letterIndex = correctOptionLetter.charCodeAt(0) - 65; // 'A'的ASCII码是65
+    return optionIndex === letterIndex;
+  }
+  
+  // 以下是原有逻辑，作为备选判断方式
   if (typeof correctAnswer === "number") {
     return optionIndex === correctAnswer;
   } else if (typeof correctAnswer === "string") {

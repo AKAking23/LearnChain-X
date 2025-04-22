@@ -200,6 +200,7 @@ router.post("/api/verify-answer", async (ctx: Context) => {
     
     // 处理不同格式的答案
     let correctAnswer;
+    let correctOptionLetter = "";
     let isCorrect = false;
     
     if (question.answer !== undefined) {
@@ -208,6 +209,7 @@ router.post("/api/verify-answer", async (ctx: Context) => {
       // 如果答案是数字
       if (typeof correctAnswer === 'number') {
         isCorrect = selectedOption === correctAnswer;
+        correctOptionLetter = String.fromCharCode(65 + correctAnswer); // 将数字转换为A,B,C,D
       } 
       // 如果答案是以选项前缀开头的字符串，如"A. 正确答案"，或"B. 选项内容"
       else if (typeof correctAnswer === 'string') {
@@ -215,12 +217,23 @@ router.post("/api/verify-answer", async (ctx: Context) => {
         if (/^[A-D]\.?\s/.test(correctAnswer)) {
           const letterIndex = correctAnswer.charCodeAt(0) - 65; // 'A' 的 ASCII 码是 65
           isCorrect = selectedOption === letterIndex;
+          correctOptionLetter = correctAnswer.charAt(0);
         } 
         // 直接匹配选项内容
         else {
-          const optionContent = question.options[selectedOption];
-          isCorrect = optionContent.includes(correctAnswer) || 
-                      correctAnswer.includes(optionContent.replace(/^[A-D]\.?\s/, ''));
+          let foundIndex = -1;
+          for (let i = 0; i < question.options.length; i++) {
+            const optionContent = question.options[i].replace(/^[A-D]\.?\s/, '');
+            if (optionContent.includes(correctAnswer) || correctAnswer.includes(optionContent)) {
+              foundIndex = i;
+              break;
+            }
+          }
+          
+          if (foundIndex !== -1) {
+            isCorrect = selectedOption === foundIndex;
+            correctOptionLetter = String.fromCharCode(65 + foundIndex);
+          }
         }
       }
     }
@@ -231,6 +244,7 @@ router.post("/api/verify-answer", async (ctx: Context) => {
       data: {
         isCorrect,
         correctAnswer: correctAnswer || "",
+        correctOptionLetter: correctOptionLetter, // 添加ABCD格式的正确答案
         explanation: question.explanation || ""
       }
     };
@@ -239,6 +253,83 @@ router.post("/api/verify-answer", async (ctx: Context) => {
     ctx.body = {
       status: "error",
       message: "验证答案失败",
+      error: error instanceof Error ? error.message : "未知错误",
+    };
+  }
+});
+
+// 获取问题答案与解析的接口
+router.get("/api/question-solution", async (ctx: Context) => {
+  try {
+    const questionIndex = ctx.query.questionIndex ? parseInt(ctx.query.questionIndex as string) : undefined;
+    const userId = ctx.query.userId as string || "default"; // 用于获取对应用户的问题数据
+    
+    if (questionIndex === undefined) {
+      ctx.status = 400;
+      ctx.body = {
+        status: "error",
+        message: "请提供问题索引",
+      };
+      return;
+    }
+    
+    // 获取之前存储的问题数据
+    const questions = questionsStore.get(userId);
+    
+    if (!questions || !questions[questionIndex]) {
+      ctx.status = 404;
+      ctx.body = {
+        status: "error",
+        message: "问题不存在或会话已过期",
+      };
+      return;
+    }
+    
+    const question = questions[questionIndex];
+    
+    // 计算正确答案的字母表示（A、B、C、D）
+    let correctOptionLetter = "";
+    if (question.answer !== undefined) {
+      const correctAnswer = question.answer;
+      
+      if (typeof correctAnswer === 'number') {
+        correctOptionLetter = String.fromCharCode(65 + correctAnswer);
+      } else if (typeof correctAnswer === 'string') {
+        if (/^[A-D]\.?\s/.test(correctAnswer)) {
+          correctOptionLetter = correctAnswer.charAt(0);
+        } else {
+          let foundIndex = -1;
+          for (let i = 0; i < question.options.length; i++) {
+            const optionContent = question.options[i].replace(/^[A-D]\.?\s/, '');
+            if (optionContent.includes(correctAnswer) || correctAnswer.includes(optionContent)) {
+              foundIndex = i;
+              break;
+            }
+          }
+          
+          if (foundIndex !== -1) {
+            correctOptionLetter = String.fromCharCode(65 + foundIndex);
+          }
+        }
+      }
+    }
+    
+    ctx.status = 200;
+    ctx.body = {
+      status: "success",
+      data: {
+        question: question.question,
+        options: question.options,
+        answer: question.answer,
+        correctOptionLetter: correctOptionLetter, // 添加ABCD格式的正确答案
+        explanation: question.explanation || "暂无解析"
+      }
+    };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {
+      status: "error",
+      message: "获取答案解析失败",
       error: error instanceof Error ? error.message : "未知错误",
     };
   }

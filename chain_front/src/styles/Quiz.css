@@ -187,10 +187,6 @@
 .home-link:hover {
   background-color: #e0e0e0;
 }
-.explanation-text{
-  margin: 20px 0;
-  color: #666;
-}
 
 /* 动画效果 */
 @keyframes fadeIn {
@@ -202,6 +198,31 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* 答案解析样式 */
+.answer-explanation {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #4caf50;
+}
+
+.answer-explanation p {
+  margin: 8px 0;
+}
+
+.correct-answer {
+  font-weight: bold;
+  color: #4caf50;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.explanation-text{
+  margin: 20px 0;
+  color: #666;
 }
 
 @keyframes spin {

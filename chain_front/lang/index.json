@@ -826,5 +826,83 @@
 		"en": "Connect wallet to use blockchain functionality",
 		"ko": "블록체인 기능을 사용하기 위해 지갑 연결",
 		"ja": "ブロックチェーン機能を使用するウォレットの接続"
+	},
+	"u2qwca1x": {
+		"zh-cn": "Move语言是由Facebook的子公司Novi Financial开发的，用于其数字货币项目Diem（原Libra）的智能合约编程语言。",
+		"en": "Move language is a smart contract programming language developed by Novi Financial, a subsidiary of Facebook, for its digital currency project Diem (formerly Libra).",
+		"ko": "무브 언어는 페이스북의 자회사인 노비파이낸셜이 개발한 것으로, 자사의 디지털화폐 프로젝트인 디엠(옛 리브라)의 스마트 계약 프로그래밍 언어로 쓰인다.",
+		"ja": "Move言語は、Facebookの子会社Novi Financialが開発した、デジタル通貨プロジェクトDiem（旧Libra）のためのインテリジェント契約プログラミング言語です。"
+	},
+	"ffk2a3g": {
+		"zh-cn": "Move语言是由哪个组织开发的？",
+		"en": "Which organization developed the Move language?",
+		"ko": "무브 언어는 어느 조직에서 개발했습니까?",
+		"ja": "Move言語はどの組織によって開発されましたか。"
+	},
+	"f29g6318": {
+		"zh-cn": "Move语言是一种静态类型的编程语言，它强调类型安全性和资源管理，特别适合编写智能合约。",
+		"en": "Move language is a statically typed programming language that emphasizes type safety and resource management, making it particularly suitable for writing smart contracts.",
+		"ko": "Move 언어는 지능형 계약을 작성하는 데 특히 적합한 유형 보안 및 리소스 관리를 강조하는 정적 유형의 프로그래밍 언어입니다.",
+		"ja": "Move言語は静的タイプのプログラミング言語であり、タイプのセキュリティとリソース管理を強調し、特にインテリジェント契約の作成に適しています。"
+	},
+	"1c0smi7": {
+		"zh-cn": "A. 面向对象",
+		"en": "A. Object oriented",
+		"ko": "A. 객체 지향",
+		"ja": "A.オブジェクト指向"
+	},
+	"g25ing7": {
+		"zh-cn": "B. 静态类型",
+		"en": "B. Static type",
+		"ko": "B. 정적 유형",
+		"ja": "B.静的タイプ"
+	},
+	"m2ncji7": {
+		"zh-cn": "C. 动态类型",
+		"en": "C. Dynamic type",
+		"ko": "C. 동적 유형",
+		"ja": "C.動的タイプ"
+	},
+	"xikomt6": {
+		"zh-cn": "D. 过程式",
+		"en": "D. Procedural approach",
+		"ko": "D. 프로세스",
+		"ja": "D.プロセス式"
+	},
+	"mf1txuf": {
+		"zh-cn": "Move语言的主要特点是什么？",
+		"en": "What are the main features of Move language?",
+		"ko": "무브 언어의 주요 특징은 무엇입니까?",
+		"ja": "Move言語の主な特徴は何ですか。"
+	},
+	"ucqkn21p": {
+		"zh-cn": "在Move语言中，使用关键字'resource'来声明资源，资源是一种特殊的结构体，它代表在Move中具有持久存在的数据。",
+		"en": "In the Move language, the keyword 'resource' is used to declare resources, which are a special type of structure that represents persistent data in the Move.",
+		"ko": "Move 언어에서 키워드'resource'를 사용하여 리소스를 선언합니다. 리소스는 Move에서 영구적으로 존재하는 데이터를 나타내는 특수한 구조체입니다.",
+		"ja": "Move言語では、Moveに永続的に存在するデータを表す特別な構造体であるリソースを宣言するためにキーワード「resource」を使用します。"
+	},
+	"wbxhh8n": {
+		"zh-cn": "在Move语言中，以下哪个关键字用于声明资源？",
+		"en": "Which of the following keywords is used to declare resources in the Move language?",
+		"ko": "Move 언어에서 리소스를 선언하는 데 사용되는 키워드는 무엇입니까?",
+		"ja": "Move言語でリソースを宣言するために使用するキーワードはどれですか。"
+	},
+	"4xo5297": {
+		"zh-cn": "查看答案与解析",
+		"en": "View answers and analysis",
+		"ko": "답변 및 해결 보기",
+		"ja": "答えと解析の表示"
+	},
+	"1imcm15": {
+		"zh-cn": "答案与解析",
+		"en": "Answers and Analysis",
+		"ko": "답변 및 해결",
+		"ja": "答えと解析"
+	},
+	"9eetwb5": {
+		"zh-cn": "正确答案：",
+		"en": "Correct answer:",
+		"ko": "정답:",
+		"ja": "正解："
 	}
 }

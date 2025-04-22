@@ -2,11 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 import "./Dashbord.css";
-import BackgroundBall from "@/components/BackgroundBall";
+// import BackgroundBall from "@/components/BackgroundBall";
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
-  const [playerActive, setPlayerActive] = useState(false); // 替代globalStore.player.if_active
   const [isMobile, setIsMobile] = useState(false); // 添加移动设备检测状态
   const containerRef = useRef<HTMLDivElement>(null);
   const middleRef = useRef<HTMLDivElement>(null);
@@ -172,11 +171,11 @@ const Dashboard: React.FC = () => {
     hidden(undefined, () => navigate("/game/new"));
   };
 
-  const continueGame = () => {
-    if (playerActive) {
-      hidden(undefined, () => navigate("/game/continue"));
-    }
-  };
+  // const continueGame = () => {
+  //   if (playerActive) {
+  //     hidden(undefined, () => navigate("/game/continue"));
+  //   }
+  // };
 
   const showRank = () => {
     hidden(undefined, () => navigate("/rank"));
@@ -205,13 +204,13 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // 检查是否有活跃玩家存档
     // 这里可以添加从localStorage或API获取玩家状态的逻辑
-    const checkPlayerActive = async () => {
-      // 示例：检查localStorage中是否有玩家数据
-      const playerData = localStorage.getItem("playerData");
-      setPlayerActive(!!playerData);
-    };
+    // const checkPlayerActive = async () => {
+    //   // 示例：检查localStorage中是否有玩家数据
+    //   const playerData = localStorage.getItem("playerData");
+    //   setPlayerActive(!!playerData);
+    // };
 
-    checkPlayerActive();
+    // checkPlayerActive();
     
     // 初始化检查设备类型
     checkMobile();
