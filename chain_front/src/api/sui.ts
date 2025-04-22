@@ -60,22 +60,23 @@ export function createDirectRewardTransaction(
 }
 
 /**
- * 创建交易对象用于查看题目解析（消耗积分）
- * @param solutionId - 解析内容对象ID
- * @param coinId - 用户支付的代币ID
+ * 创建交易对象用于查看题目解析（使用简化方法）
+ * 调用新添加的view_solution_simple方法，不需要传入问题ID
+ * @param payment - 用户积分代币ID
+ * @param amount - 要销毁的积分数量
  * @returns 交易对象
  */
-export function createViewSolutionTransaction(
-  solutionId: string,
-  coinId: string
+export function createViewSolutionSimpleTransaction(
+  payment: string,
+  amount: number
 ): Transaction {
   const tx = new Transaction();
 
   tx.moveCall({
-    target: `${CONTRACT_ADDRESS}::point_token::view_solution`,
+    target: `${CONTRACT_ADDRESS}::quiz::view_solution_simple`,
     arguments: [
-      tx.object(solutionId), // 解析内容对象
-      tx.object(coinId), // 用于支付的代币
+      tx.object(payment), // 用户的代币ID
+      tx.pure.u64(amount), // 要销毁的积分数量
     ],
   });
 
@@ -184,7 +185,7 @@ export function createAddSimpleQuestionParams(
 export default {
   createRewardTransaction,
   createDirectRewardTransaction,
-  createViewSolutionTransaction,
+  createViewSolutionSimpleTransaction,
   createDirectRewardParams,
   createAddQuestionTransaction,
   createAddSimpleQuestionTransaction,

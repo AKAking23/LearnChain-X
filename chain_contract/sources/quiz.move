@@ -616,3 +616,28 @@ public entry fun add_simple_question(
     // 返回问题ID
     question_id
 }
+
+/**
+ * 简化版查看解析（不需要问题ID）
+ * 用户直接支付一定数量的积分，不关联特定问题
+ * @param payment - 用户的积分代币
+ * @param amount - 要销毁的积分数量
+ * @param ctx - 交易上下文
+ */
+public entry fun view_solution_simple(
+    payment: &mut Coin<POINT_TOKEN>,
+    amount: u64,
+    ctx: &mut TxContext,
+) {
+    // 检查用户积分是否足够
+    assert!(coin::value(payment) >= amount, EInsufficientBalance);
+
+    // 从代币中扣除费用
+    let burn_amount = coin::split(payment, amount, ctx);
+    
+    // 触发解析查看事件，使用0作为占位符问题ID
+    // emit_solution_viewed(tx_context::sender(ctx), 0, amount);
+
+    // 将代币发送到黑洞地址（@0x0）
+    transfer::public_transfer(burn_amount, @0x0);
+}

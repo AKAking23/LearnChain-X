@@ -7,7 +7,7 @@ import {
 } from "../api/coze";
 import {
   createDirectRewardParams,
-  createViewSolutionTransaction,
+  createViewSolutionSimpleTransaction,
   createAddSimpleQuestionParams,
   CONTRACT_ADDRESS,
 } from "../api/sui";
@@ -45,9 +45,9 @@ const Quiz: React.FC = () => {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
+  // userCoinId已经不再用于查看解析功能，但仍保留用于获取和显示代币余额
   const [userCoinId, setUserCoinId] = useState<string | null>(null);
   const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
-  const [solutionIds] = useState<{ [key: number]: string }>({});
 
   // 获取用户代币ID和余额的函数
   const getUserCoinId = async (address: string) => {
@@ -111,50 +111,6 @@ const Quiz: React.FC = () => {
   const refreshTokenBalance = async () => {
     if (currentAccount) {
       await getUserCoinId(currentAccount.address);
-    }
-  };
-
-  // 获取解析对象ID的函数
-  const getSolutionId = async (questionId: number): Promise<string | null> => {
-    try {
-      // 这里应该通过链上查询获取对应问题的解析对象ID
-      // 实际实现需要根据实际存储方式定制
-      // 这里仅作为示例，返回缓存或默认值
-      if (solutionIds[questionId]) {
-        return solutionIds[questionId];
-      }
-
-      // TODO: 实现从链上获取解析对象ID的逻辑
-      // 从链上获取解析对象ID
-      const objects = await suiClient.getOwnedObjects({
-        owner: "0x0", // 共享对象的所有者通常是0x0
-        filter: {
-          StructType: `${CONTRACT_ADDRESS}::point_token::SolutionContent`,
-        },
-        options: {
-          showContent: true,
-        },
-      });
-
-      // 找到匹配questionId的SolutionContent对象
-      for (const obj of objects.data || []) {
-        if (obj.data) {
-          const content = obj.data.content;
-          if (content && "fields" in content) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const fields = content.fields as Record<string, any>;
-            if (fields.question_id === questionId) {
-              return obj.data.objectId;
-            }
-          }
-        }
-      }
-
-      // 如果没有找到，返回null
-      return null;
-    } catch (error) {
-      console.error("获取解析对象ID失败:", error);
-      return null;
     }
   };
 
@@ -316,6 +272,9 @@ const Quiz: React.FC = () => {
               {
                 onSuccess: (result) => {
                   console.log("奖励积分成功!", result);
+                  setTimeout(() => {
+                    refreshTokenBalance();
+                  }, 2000);
                 },
                 onError: (error) => {
                   console.error("奖励积分失败:", error);
@@ -342,65 +301,77 @@ const Quiz: React.FC = () => {
       });
 
       if (result.status === "success") {
-        // 设置答案结果
-        setAnswerResult({
-          isCorrect:
-            selectedOption !== null &&
-            isCorrectOption(
-              result.data.answer,
-              selectedOption,
-              result.data.correctOptionLetter
-            ),
-          correctAnswer: result.data.answer,
-          correctOptionLetter: result.data.correctOptionLetter,
-          explanation: result.data.explanation,
-        });
-        setShowAnswer(true);
-
-        // 如果用户已登录，调用合约消耗积分查看解析
-        if (currentAccount) {
+        // 如果用户已登录且有代币，调用合约查看解析
+        if (currentAccount && userCoinId) {
           try {
-            // 获取当前问题ID
-            const questionId =
-              questions[currentQuestionIndex].id || currentQuestionIndex;
-            console.log(questionId, "questionId---");
+            // 使用新的简化方法，设置销毁的代币数量
+            const amount = 100000000; // 1 POINT (考虑小数位数)
 
-            // 获取解析对象ID
-            const solutionId = await getSolutionId(questionId);
-            console.log(solutionId, "solutionId---");
+            // 创建交易，使用简化的方法
+            const transaction = createViewSolutionSimpleTransaction(
+              userCoinId,
+              amount
+            );
 
-            // 如果没有用户代币ID，重新获取
-            if (!userCoinId) {
-              const coinId = await getUserCoinId(currentAccount.address);
-              setUserCoinId(coinId);
-            }
+            // 执行交易
+            signAndExecuteTransaction(
+              { transaction },
+              {
+                onSuccess: () => {
+                  // 刷新代币余额
+                  setTimeout(() => {
+                    refreshTokenBalance();
+                  }, 2000);
 
-            // 如果成功获取了必要的ID，进行交易
-            if (solutionId && userCoinId) {
-              // 创建交易
-              const transaction = createViewSolutionTransaction(
-                solutionId,
-                userCoinId
-              );
-
-              // 执行交易
-              signAndExecuteTransaction(
-                { transaction },
-                {
-                  onSuccess: (result) => {
-                    console.log("查看解析成功!", result);
-                  },
-                  onError: (error) => {
-                    console.error("查看解析失败:", error);
-                  },
-                }
-              );
-            } else {
-              console.log("缺少必要的ID信息，跳过链上交易");
-            }
+                  // 设置答案结果
+                  setAnswerResult({
+                    isCorrect:
+                      selectedOption !== null &&
+                      isCorrectOption(
+                        result.data.answer,
+                        selectedOption,
+                        result.data.correctOptionLetter
+                      ),
+                    correctAnswer: result.data.answer,
+                    correctOptionLetter: result.data.correctOptionLetter,
+                    explanation: result.data.explanation,
+                  });
+                  setShowAnswer(true);
+                },
+                onError: (error) => {
+                  console.error("查看解析失败:", error);
+                },
+              }
+            );
           } catch (error) {
+            alert("缺少积分代币");
             console.error("调用合约查看解析失败:", error);
           }
+        } else if (currentAccount) {
+          alert("暂无积分代币");
+          // 如果用户已登录但没有代币，使用直接奖励方法
+          // try {
+          //   // 创建直接奖励交易
+          //   signAndExecuteTransaction(
+          //     createDirectRewardParams(
+          //       TESTNET_QUIZMANAGER_ID,
+          //       currentAccount.address,
+          //       1000000 // 奖励1个代币
+          //     ),
+          //     {
+          //       onSuccess: (result) => {
+          //         console.log("查看解析成功(使用直接奖励)!", result);
+          //         // 刷新代币余额
+          //         refreshTokenBalance();
+          //       },
+          //       onError: (error) => {
+          //         console.error("查看解析失败:", error);
+          //       },
+          //     }
+          //   );
+          // } catch (error) {
+          //   console.error("调用合约查看解析失败:", error);
+          // }
         }
       }
     } catch (error) {
