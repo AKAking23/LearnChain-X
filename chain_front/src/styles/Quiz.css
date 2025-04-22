@@ -203,6 +203,7 @@
 /* 答案解析样式 */
 .answer-explanation {
   margin-top: 20px;
+  margin-bottom: 20px;
   padding: 15px;
   border-radius: 8px;
   background-color: #f8f9fa;

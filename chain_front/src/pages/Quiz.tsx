@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   sendMessageToCoze,
   verifyAnswer,
@@ -32,6 +32,9 @@ interface QuizQuestion {
 }
 
 const Quiz: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const difficulty = searchParams.get('difficulty') || 'primary';
+  
   const [loading, setLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
@@ -136,7 +139,7 @@ const Quiz: React.FC = () => {
       try {
         setLoading(true);
         // 从localStorage检查是否已经缓存了题目
-        const cachedQuestions = localStorage.getItem("quizQuestions");
+        const cachedQuestions = localStorage.getItem(`quizQuestions_${difficulty}`);
         // 生成或获取用户ID
         const userId =
           localStorage.getItem("userId") ||
@@ -148,9 +151,24 @@ const Quiz: React.FC = () => {
           setLoading(false);
         } else {
           // 如果没有缓存，则调用API获取题目
+          // 根据难度级别调整提示词
+          let prompt = "";
+          switch(difficulty) {
+            case 'primary':
+              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            case 'intermediate':
+              prompt = "请生成3道中级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            case 'advanced':
+              prompt = "请生成3道高级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            default:
+              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+          }
+
           const response = await sendMessageToCoze({
-            input:
-              "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
+            input: prompt,
             userId: userId,
           });
 
@@ -178,8 +196,8 @@ const Quiz: React.FC = () => {
 
             if (questions.length > 0) {
               setQuestions(questions);
-              // 缓存到localStorage
-              localStorage.setItem("quizQuestions", JSON.stringify(questions));
+              // 缓存到localStorage，包含难度信息
+              localStorage.setItem(`quizQuestions_${difficulty}`, JSON.stringify(questions));
             } else {
               // 如果未能提取到题目数据，使用默认题目
               setQuestions(getDefaultQuestions());
@@ -202,7 +220,7 @@ const Quiz: React.FC = () => {
     };
 
     fetchQuizQuestions();
-  }, []);
+  }, [difficulty]);
 
   const getDefaultQuestions = (): QuizQuestion[] => {
     return [
@@ -476,7 +494,10 @@ const Quiz: React.FC = () => {
     return (
       <div className="quiz-loading">
         <div className="loading-spinner"></div>
-        <h2 className="loading-text">一大波题库正在来临...</h2>
+        <h2 className="loading-text">一大波{
+          difficulty === 'primary' ? '初级' : 
+          difficulty === 'intermediate' ? '中级' : 
+          difficulty === 'advanced' ? '高级' : ''}题库正在来临...</h2>
       </div>
     );
   }
