@@ -9,10 +9,14 @@ import {
   createDirectRewardParams,
   createViewSolutionSimpleTransaction,
   createAddSimpleQuestionParams,
+  createSelfMintSBTParams,
   CONTRACT_ADDRESS,
 } from "../api/sui";
 import "../styles/Quiz.css"; // 需要创建这个CSS文件
-import { TESTNET_QUIZMANAGER_ID, TESTNET_REGISTRY_ID } from "@/utils/constants";
+import { 
+  TESTNET_QUIZMANAGER_ID, 
+  TESTNET_REGISTRY_ID
+} from "@/utils/constants";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
@@ -41,6 +45,7 @@ const Quiz: React.FC = () => {
     correctOptionLetter?: string;
     explanation?: string;
   } | null>(null);
+  const [sbtAwarded, setSbtAwarded] = useState<boolean>(false);
 
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
@@ -237,6 +242,10 @@ const Quiz: React.FC = () => {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setQuizCompleted(true);
+      // 检查是否所有题目都回答正确，尝试发放SBT
+      if (score === questions.length && currentAccount) {
+        mintAchievementSBT();
+      }
     }
   };
 
@@ -305,7 +314,8 @@ const Quiz: React.FC = () => {
         if (currentAccount && userCoinId) {
           try {
             // 使用新的简化方法，设置销毁的代币数量
-            const amount = 100000000; // 1 POINT (考虑小数位数)
+            // const amount = 100000000; // 1 POINT (考虑小数位数)
+            const amount = 50000000;
 
             // 创建交易，使用简化的方法
             const transaction = createViewSolutionSimpleTransaction(
@@ -322,7 +332,7 @@ const Quiz: React.FC = () => {
                   // 刷新代币余额
                   setTimeout(() => {
                     refreshTokenBalance();
-                  }, 2000);
+                  }, 1000);
 
                   // 设置答案结果
                   setAnswerResult({
@@ -387,6 +397,7 @@ const Quiz: React.FC = () => {
     setQuizCompleted(false);
     setShowAnswer(false);
     setAnswerResult(null);
+    setSbtAwarded(false);
   };
 
   // 添加简化问题到链上的示例函数
@@ -425,6 +436,42 @@ const Quiz: React.FC = () => {
     }
   };
 
+  // 铸造成就SBT奖励
+  const mintAchievementSBT = async () => {
+    if (!currentAccount || sbtAwarded) return;
+
+    try {
+      // SBT信息
+      const sbtName = "LearnChain-X 答题达人";
+      const sbtDescription = "恭喜完成LearnChain-X所有问题并答对全部题目，赢得此成就徽章！";
+      const sbtUrl = "https://example.com/sbt-badge.png"; // 应替换为实际徽章图片URL
+      
+      // 创建并执行自助铸造SBT的交易
+      signAndExecuteTransaction(
+        createSelfMintSBTParams(
+          sbtName,
+          sbtDescription,
+          sbtUrl,
+          score, // 当前得分
+          questions.length // 总题目数
+        ),
+        {
+          onSuccess: (result) => {
+            console.log("SBT铸造成功!", result);
+            setSbtAwarded(true);
+            alert("恭喜您获得「答题达人」成就徽章！");
+          },
+          onError: (error) => {
+            console.error("SBT铸造失败:", error);
+            alert("SBT铸造失败: " + error.message);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("创建SBT交易失败:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="quiz-loading">
@@ -441,9 +488,26 @@ const Quiz: React.FC = () => {
         <p>
           您的分数: {score} / {questions.length}
         </p>
+        {score === questions.length && (
+          <div className="achievement-section">
+            <h3>🏆 恭喜您答对所有题目！</h3>
+            {sbtAwarded ? (
+              <p className="achievement-text">已获得「答题达人」灵魂绑定代币成就徽章！</p>
+            ) : currentAccount ? (
+              <Button 
+                onClick={mintAchievementSBT} 
+                className="mint-sbt-button"
+              >
+                领取SBT成就徽章
+              </Button>
+            ) : (
+              <p className="achievement-text">请连接钱包以领取SBT成就徽章</p>
+            )}
+          </div>
+        )}
         <div className="quiz-actions">
           <button onClick={resetQuiz}>重新开始</button>
-          <Link to="/" className="home-link">
+          <Link to="/dashboard" className="home-link">
             返回首页
           </Link>
         </div>

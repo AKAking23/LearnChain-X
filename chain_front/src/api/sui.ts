@@ -34,6 +34,125 @@ export function createRewardTransaction(
 }
 
 /**
+ * 创建交易对象用于铸造SBT奖励
+ * @param issuerCapId - 发行者凭证ID
+ * @param name - SBT名称
+ * @param description - SBT描述
+ * @param url - 元数据URL
+ * @param recipient - 接收者地址
+ * @returns 交易对象
+ */
+export function createMintSBTTransaction(
+  issuerCapId: string,
+  name: string,
+  description: string,
+  url: string,
+  recipient: string
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${CONTRACT_ADDRESS}::sbt::mint`,
+    arguments: [
+      tx.object(issuerCapId), // 发行者凭证
+      tx.pure.string(name), // SBT名称
+      tx.pure.string(description), // SBT描述
+      tx.pure.string(url), // 元数据URL
+      tx.pure.address(recipient), // 接收者地址
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * 创建交易对象用于用户自助铸造SBT成就奖励
+ * 不需要发行者凭证，用户可以在满足条件时直接铸造
+ * @param name - SBT名称
+ * @param description - SBT描述
+ * @param url - 元数据URL
+ * @param quizScore - 用户的得分
+ * @param totalQuestions - 测验的总题目数
+ * @returns 交易对象
+ */
+export function createSelfMintSBTTransaction(
+  name: string,
+  description: string,
+  url: string,
+  quizScore: number,
+  totalQuestions: number
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${CONTRACT_ADDRESS}::sbt::self_mint_achievement`,
+    arguments: [
+      tx.pure.string(name), // SBT名称
+      tx.pure.string(description), // SBT描述
+      tx.pure.string(url), // 元数据URL
+      tx.pure.u64(quizScore), // 用户得分
+      tx.pure.u64(totalQuestions), // 总题目数
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * 创建交易参数用于用户自助铸造SBT成就奖励
+ * @param name - SBT名称
+ * @param description - SBT描述
+ * @param url - 元数据URL
+ * @param quizScore - 用户的得分
+ * @param totalQuestions - 测验的总题目数
+ * @returns 签名执行交易参数
+ */
+export function createSelfMintSBTParams(
+  name: string,
+  description: string,
+  url: string,
+  quizScore: number,
+  totalQuestions: number
+): { transaction: Transaction } {
+  return {
+    transaction: createSelfMintSBTTransaction(
+      name,
+      description,
+      url,
+      quizScore,
+      totalQuestions
+    ),
+  };
+}
+
+/**
+ * 创建交易参数用于铸造SBT奖励
+ * @param issuerCapId - 发行者凭证ID
+ * @param name - SBT名称
+ * @param description - SBT描述
+ * @param url - 元数据URL
+ * @param recipient - 接收者地址
+ * @returns 签名执行交易参数
+ */
+export function createMintSBTParams(
+  issuerCapId: string,
+  name: string,
+  description: string,
+  url: string,
+  recipient: string
+): { transaction: Transaction } {
+  return {
+    transaction: createMintSBTTransaction(
+      issuerCapId,
+      name,
+      description,
+      url,
+      recipient
+    ),
+  };
+}
+
+/**
  * 创建交易对象用于直接奖励用户积分（使用direct_reward方法）
  * @param quizManagerId - Quiz管理器ID
  * @param userAddress - 用户地址
@@ -193,5 +312,9 @@ export default {
   createAddQuestionTransaction,
   createAddSimpleQuestionTransaction,
   createAddSimpleQuestionParams,
+  createMintSBTTransaction,
+  createMintSBTParams,
+  createSelfMintSBTTransaction,
+  createSelfMintSBTParams,
   CONTRACT_ADDRESS,
 };

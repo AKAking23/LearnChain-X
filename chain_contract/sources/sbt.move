@@ -18,6 +18,8 @@ use sui::tx_context::{Self, TxContext};
 const ESoulboundTransferNotAllowed: u64 = 1;
 /// 非拥有者操作错误
 const ENotOwner: u64 = 2;
+/// 未达到铸造条件
+const EConditionNotMet: u64 = 3;
 
 // ===== 类型定义 =====
 /**
@@ -155,6 +157,61 @@ public entry fun mint(
     });
 
     // 直接转移给接收者
+    transfer::transfer(sbt, recipient);
+}
+
+/**
+     * 用户自助铸造成就SBT
+     * 允许用户在完成所有测验后自己铸造成就SBT
+     * 此函数不需要IssuerCap，但需要传入quiz_score和total_questions以验证条件
+     * 
+     * @param name - SBT名称
+     * @param description - SBT描述
+     * @param url - 元数据URL
+     * @param quiz_score - 用户的测验得分
+     * @param total_questions - 测验的总题目数
+     * @param ctx - 交易上下文
+     */
+public entry fun self_mint_achievement(
+    name: String,
+    description: String,
+    url: String,
+    quiz_score: u64,
+    total_questions: u64,
+    ctx: &mut TxContext,
+) {
+    // 验证条件：分数必须等于总题目数（即全部答对）
+    assert!(quiz_score == total_questions && total_questions > 0, EConditionNotMet);
+    
+    // 创建属性表
+    let mut attributes = table::new<String, String>(ctx);
+    
+    // 添加成就相关属性（使用预定义的字符串值，而不是尝试转换数字）
+    table::add(&mut attributes, string::utf8(b"quiz_score"), string::utf8(b"perfect_score"));
+    table::add(&mut attributes, string::utf8(b"total_questions"), string::utf8(b"all_correct"));
+    table::add(&mut attributes, string::utf8(b"achievement_type"), string::utf8(b"quiz_master"));
+    
+    // 获取交易发送者
+    let recipient = tx_context::sender(ctx);
+    
+    // 创建SBT对象
+    let sbt = SoulboundToken {
+        id: object::new(ctx),
+        name,
+        description,
+        url,
+        issuer: recipient, // 自助铸造的情况下，发行者就是用户自己
+        attributes,
+    };
+
+    // 发出铸造事件
+    event::emit(SBTMinted {
+        id: object::uid_to_address(&sbt.id),
+        recipient,
+        name: sbt.name,
+    });
+
+    // 直接转移给用户自己
     transfer::transfer(sbt, recipient);
 }
 
