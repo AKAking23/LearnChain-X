@@ -2,14 +2,17 @@ import React from "react";
 import { Link, Outlet } from "react-router-dom";
 import { ConnectButton } from "@mysten/dapp-kit";
 import BackgroundBall from "@/components/BackgroundBall";
-
+import logoImage from "@/assets/images/logo.png";
 // 将Layout组件拆分为外层和内层组件
 const InnerLayout: React.FC = () => {
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="logo">
-          <Link to="/">LearnChain-X</Link>
+          {/* <Link to="/">LearnChain-X</Link> */}
+          <Link to="/">
+            <img width={240} src={logoImage} alt="learnChain-X" />
+          </Link>
         </div>
         <nav className="main-nav">
           <ConnectButton style={{ color: "#fff" }} />
