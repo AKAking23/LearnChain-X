@@ -46,6 +46,7 @@
   display: flex;
   flex-direction: column;
   position: absolute;
+  left: 300px;
   color: var(--color_white);
   mix-blend-mode: exclusion;
   z-index: 10;
@@ -96,6 +97,7 @@
 
 .welcome_middle_balls div {
   position: absolute;
+  left: 500px;
 }
 
 .welcome_middle_balls_filter {
@@ -134,7 +136,7 @@
   stroke: var(--color_front);
   stroke-dasharray: 0 calc(var(--scale) * 2rem);
   transform-origin: center;
-  animation: welcome_line_rotate 8s linear infinite;
+  /* animation: welcome_line_rotate 8s linear infinite; */
 }
 
 .welcome_nav {
@@ -150,8 +152,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: calc(var(--scale) * 135rem);
-  height: calc(var(--scale) * 135rem);
+  /* width: calc(var(--scale) * 135rem); */
+  width: calc(var(--scale) * 100rem);
+  height: calc(var(--scale) * 50rem);
   transform: rotate(var(--before_rotate));
   pointer-events: none;
 }
@@ -188,7 +191,7 @@
   position: absolute;
   display: flex;
   align-items: center;
-  left: 99.7%;
+  left: 80%;
   height: calc(var(--scale) * 7rem);
   transform-origin: left;
   transform: rotate(calc(var(--interval_rotate) * var(--i) * -1 - var(--correct_rotate)));
@@ -220,7 +223,7 @@
 }
 
 .wns_node p {
-  align-self: flex-end;
+  /* align-self: flex-end; */
   color: var(--color_front);
   white-space: nowrap;
   transition: transform 0.5s var(--ease_out);
@@ -255,6 +258,7 @@
 
 ._font_2 {
   font-size: calc(var(--scale) * 2rem);
+  font-family: title !important;
 }
 
 ._font_3 {

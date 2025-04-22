@@ -187,10 +187,20 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
-
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(0); /* 从下往上 */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(100px); /* 最终位置 */
+  }
+}
 /* 渐变色背景标题 */
 .gradient-bg-title {
   margin: 0 auto;
+  animation: slideUp 1s ease-out forwards; /* 动画效果 */
 }
 .gradient-bg-title h2 {
   font-size: 3rem;

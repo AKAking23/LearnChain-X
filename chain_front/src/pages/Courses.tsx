@@ -44,6 +44,13 @@ const Courses: React.FC = () => {
           </div>
         ))}
       </div>
+      
+      <div className="quiz-banner">
+        <h2>测试你的区块链知识</h2>
+        <p>完成我们的区块链选择题测验，检验你的学习成果！</p>
+        <Link to="/quiz" className="quiz-link">开始测验</Link>
+      </div>
+      
       <div className="back-link">
         <Link to="/">返回首页</Link>
       </div>

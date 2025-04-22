@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 import "./Dashbord.css";
-
+import BackgroundBall from "@/components/BackgroundBall";
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
@@ -348,15 +348,6 @@ const Dashboard: React.FC = () => {
         </svg>
       </div>
       <div className="welcome_nav" ref={navRef}>
-        <svg className="welcome_nav_line" viewBox="0 0 50 50">
-          <circle
-            className="_dashed"
-            cx="25"
-            cy="25"
-            r="25"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
         <div
           className="welcome_nav_selection"
           style={{ "--i": 0 } as React.CSSProperties}
@@ -370,12 +361,9 @@ const Dashboard: React.FC = () => {
           className="welcome_nav_selection"
           style={{ "--i": 1 } as React.CSSProperties}
         >
-          <div
-            className={`wns_node ${!playerActive ? "wns_unclickable" : ""}`}
-            onClick={continueGame}
-          >
+          <div className="wns_node" onClick={startNewGame}>
             <div></div>
-            <p className="_font_2">CONTINUE</p>
+            <p className="_font_2">NEW GAME</p>
           </div>
         </div>
         <div

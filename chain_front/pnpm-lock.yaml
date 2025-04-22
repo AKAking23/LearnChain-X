@@ -23,6 +23,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.71.3
         version: 5.74.3(react@19.1.0)
+      axios:
+        specifier: ^1.8.4
+        version: 1.8.4
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

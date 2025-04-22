@@ -27,4 +27,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001', // 假设你的后端服务运行在3001端口
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''), // 如果后端路径不包含/api前缀则取消注释
+      }
+    }
+  }
 });

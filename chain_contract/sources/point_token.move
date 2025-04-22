@@ -2,6 +2,7 @@
  * 积分代币模块
  * 实现了ERC20风格的代币，用于答题系统的奖励和支付
  * 用户答对题目获得积分，查看解析需要消耗积分
+ * 设计为去中心化模式，用户可以直接获得积分奖励
  */
 module chain_contract::point_token;
 
@@ -12,6 +13,7 @@ use sui::coin::{Self, Coin, TreasuryCap};
 use sui::event;
 use sui::object::{Self, UID};
 use sui::package;
+use sui::table::{Self, Table};
 use sui::transfer;
 use sui::tx_context::{Self, TxContext};
 
@@ -20,30 +22,53 @@ use sui::tx_context::{Self, TxContext};
 const EInsufficientBalance: u64 = 0;
 /// 操作未被授权错误
 const ENotAuthorized: u64 = 1;
+/// 重复回答问题错误
+const EAlreadyAnswered: u64 = 2;
+/// 问题不存在错误
+const EQuestionNotFound: u64 = 3;
+/// 答案不正确错误
+const EIncorrectAnswer: u64 = 4;
+
+/// 定义积分代币类型 - 使用模块名称的全部大写版本作为one-time witness
+public struct POINT_TOKEN has drop {}
 
 /**
-     * 定义积分代币类型
-     * 该结构仅用于类型化代币，没有实际字段
-     */
-public struct POINT has drop {}
-
-/**
-     * 答题管理器结构
-     * 控制积分代币的发行和管理
-     */
-public struct QuizManager has key {
+ * 问题结构体
+ * 存储问题相关信息
+ */
+public struct Question has key, store {
     id: UID,
-    /// 积分代币的铸币权，用于创建新代币
-    treasury_cap: TreasuryCap<POINT>,
-    /// 管理员地址，只有管理员可以管理代币
-    admin: address,
-    // 可以根据需要添加其他管理字段
+    /// 问题ID
+    question_id: u64,
+    /// 问题内容
+    content: string::String,
+    /// 正确答案
+    correct_answer: string::String,
+    /// 奖励积分数量
+    reward_points: u64,
 }
 
 /**
-     * 答案解析结构
-     * 存储特定问题的解析内容和所需的查看费用
-     */
+ * 答题管理器结构
+ * 控制积分代币的发行和管理，并存储问题与用户答题记录
+ */
+public struct QuizManager has key {
+    id: UID,
+    /// 积分代币的铸币权，用于创建新代币
+    treasury_cap: TreasuryCap<POINT_TOKEN>,
+    /// 管理员地址，只有管理员可以添加问题
+    admin: address,
+    /// 存储用户已答题记录，防止重复奖励
+    /// 格式: (用户地址, 问题ID) => 是否已回答
+    user_answers: Table<address, Table<u64, bool>>,
+    /// 下一个问题ID
+    next_question_id: u64,
+}
+
+/**
+ * 答案解析结构
+ * 存储特定问题的解析内容和所需的查看费用
+ */
 public struct SolutionContent has key, store {
     id: UID,
     /// 关联的问题ID
@@ -56,9 +81,9 @@ public struct SolutionContent has key, store {
 
 // 事件定义
 /**
-     * 答题完成事件
-     * 当用户完成答题时触发，记录答题结果
-     */
+ * 答题完成事件
+ * 当用户完成答题时触发，记录答题结果
+ */
 public struct QuizCompleted has copy, drop {
     /// 用户地址
     user: address,
@@ -71,9 +96,9 @@ public struct QuizCompleted has copy, drop {
 }
 
 /**
-     * 查看解析事件
-     * 当用户查看题目解析时触发
-     */
+ * 查看解析事件
+ * 当用户查看题目解析时触发
+ */
 public struct SolutionViewed has copy, drop {
     /// 用户地址
     user: address,
@@ -84,15 +109,24 @@ public struct SolutionViewed has copy, drop {
 }
 
 /**
-     * 创建新的QuizManager实例
-     * 初始化积分代币系统
-     * @param ctx - 交易上下文
-     * @return 创建的QuizManager实例
-     */
-public fun create_quiz_manager(ctx: &mut TxContext): QuizManager {
-    // 创建代币元数据
-    let (treasury_cap, metadata) = coin::create_currency<POINT>(
-        POINT {},
+ * 问题添加事件
+ * 当管理员添加新问题时触发
+ */
+public struct QuestionAdded has copy, drop {
+    /// 问题ID
+    question_id: u64,
+    /// 奖励积分
+    reward_points: u64,
+}
+
+/**
+ * 模块初始化函数，自动调用
+ * 当模块首次发布时由框架自动调用
+ */
+fun init(witness: POINT_TOKEN, ctx: &mut TxContext) {
+    // 使用one-time witness创建代币
+    let (treasury_cap, metadata) = coin::create_currency<POINT_TOKEN>(
+        witness,
         9, // 小数位数
         b"POINT", // 符号
         b"Quiz Points", // 名称
@@ -104,79 +138,103 @@ public fun create_quiz_manager(ctx: &mut TxContext): QuizManager {
     // 转移元数据给发布者
     transfer::public_transfer(metadata, tx_context::sender(ctx));
 
-    // 创建并返回Quiz管理器
-    QuizManager {
+    // 创建Quiz管理器实例
+    let quiz_manager = QuizManager {
         id: object::new(ctx),
         treasury_cap,
         admin: tx_context::sender(ctx),
-    }
+        user_answers: table::new(ctx),
+        next_question_id: 0,
+    };
+
+    // 将管理器共享为全局对象，使任何人都能访问和使用
+    transfer::share_object(quiz_manager);
 }
 
 /**
-     * 部署合约并初始化Quiz系统
-     * 创建管理器实例并转移给交易发起者
-     * @param ctx - 交易上下文
-     */
-public entry fun initialize(ctx: &mut TxContext) {
-    // 创建管理器实例
-    let quiz_manager = create_quiz_manager(ctx);
-
-    // 转移给交易发起者
-    transfer::transfer(quiz_manager, tx_context::sender(ctx));
-}
-
-/**
-     * 添加答题解析
-     * 创建并共享新的解析内容对象
-     * @param manager - 管理器实例
-     * @param question_id - 问题ID
-     * @param content - 解析内容
-     * @param token_cost - 查看所需代币数量
-     * @param ctx - 交易上下文
-     */
-public entry fun add_solution(
+ * 添加新问题
+ * 创建并共享新的问题对象
+ * @param manager - 管理器实例
+ * @param content - 问题内容
+ * @param correct_answer - 正确答案
+ * @param reward_points - 答对奖励的积分
+ * @param solution_content - 解析内容
+ * @param token_cost - 查看解析所需积分
+ * @param ctx - 交易上下文
+ */
+public entry fun add_question(
     manager: &mut QuizManager,
-    question_id: u64,
     content: string::String,
+    correct_answer: string::String,
+    reward_points: u64,
+    solution_content: string::String,
     token_cost: u64,
     ctx: &mut TxContext,
 ) {
-    // 验证是否为管理员
-    assert!(tx_context::sender(ctx) == manager.admin, ENotAuthorized);
+    // 获取并递增问题ID
+    let question_id = manager.next_question_id;
+    manager.next_question_id = question_id + 1;
+
+    // 创建问题对象
+    let question = Question {
+        id: object::new(ctx),
+        question_id,
+        content,
+        correct_answer,
+        reward_points,
+    };
 
     // 创建解析对象
     let solution = SolutionContent {
         id: object::new(ctx),
         question_id,
-        content,
+        content: solution_content,
         token_cost,
     };
 
-    // 共享解析内容对象，使其可被所有人访问
+    // 共享问题和解析对象，使其可被所有人访问
+    transfer::share_object(question);
     transfer::share_object(solution);
+
+    // 发出问题添加事件
+    event::emit(QuestionAdded {
+        question_id,
+        reward_points,
+    });
 }
 
 /**
-     * 回答正确后奖励积分
-     * 铸造新的积分代币并转移给用户
-     * @param manager - 管理器实例
-     * @param user - 用户地址
-     * @param question_id - 问题ID
-     * @param points - 奖励的积分数量
-     * @param ctx - 交易上下文
-     */
+ * 用户回答问题 - 简化版
+ * 直接奖励用户积分，不验证答案（前端已验证）
+ * @param manager - 管理器实例
+ * @param question - 问题对象
+ * @param user - 接收奖励的用户地址
+ * @param ctx - 交易上下文
+ */
 public entry fun reward_correct_answer(
     manager: &mut QuizManager,
+    question: &Question,
     user: address,
-    question_id: u64,
-    points: u64,
     ctx: &mut TxContext,
 ) {
-    // 验证是否为管理员
-    assert!(tx_context::sender(ctx) == manager.admin, ENotAuthorized);
+    let question_id = question.question_id;
+
+    // 检查用户是否已经回答过这个问题
+    if (!table::contains(&manager.user_answers, user)) {
+        table::add(&mut manager.user_answers, user, table::new(ctx));
+    };
+
+    let user_question_table = table::borrow_mut(&mut manager.user_answers, user);
+
+    // 确保用户没有重复获取奖励
+    assert!(!table::contains(user_question_table, question_id), EAlreadyAnswered);
+
+    // 记录用户已回答这个问题
+    table::add(user_question_table, question_id, true);
 
     // 铸造积分
-    let points_coin = coin::mint<POINT>(&mut manager.treasury_cap, points, ctx);
+    let points = question.reward_points;
+    let points_coin = coin::mint<POINT_TOKEN>(&mut manager.treasury_cap, points, ctx);
 
     // 转移给用户
     transfer::public_transfer(points_coin, user);
@@ -191,41 +249,74 @@ public entry fun reward_correct_answer(
 }
 
 /**
-     * 记录错误答案
-     * 当用户回答错误时，仅记录事件，不扣除积分
-     * @param manager - 管理器实例
-     * @param user - 用户地址
-     * @param question_id - 问题ID
-     * @param ctx - 交易上下文
-     */
-public entry fun record_incorrect_answer(
-    manager: &QuizManager,
-    user: address,
-    question_id: u64,
+ * 用户回答问题（原始方法，保留但不推荐使用）
+ * 验证答案并自动奖励积分
+ * @param manager - 管理器实例
+ * @param question - 问题对象
+ * @param answer - 用户的答案
+ * @param ctx - 交易上下文
+ */
+public entry fun answer_question(
+    manager: &mut QuizManager,
+    question: &Question,
+    answer: string::String,
     ctx: &mut TxContext,
 ) {
-    // 验证是否为管理员
-    assert!(tx_context::sender(ctx) == manager.admin, ENotAuthorized);
+    let user = tx_context::sender(ctx);
+    let question_id = question.question_id;
 
-    // 错误回答不扣积分，只记录事件
-    event::emit(QuizCompleted {
-        user,
-        question_id,
-        is_correct: false,
-        points_earned: 0,
-    });
+    // 检查用户是否已经回答过这个问题
+    if (!table::contains(&manager.user_answers, user)) {
+        table::add(&mut manager.user_answers, user, table::new(ctx));
+    };
+
+    let user_question_table = table::borrow_mut(&mut manager.user_answers, user);
+
+    assert!(!table::contains(user_question_table, question_id), EAlreadyAnswered);
+
+    // 验证答案
+    let is_correct = string::bytes(&question.correct_answer) == string::bytes(&answer);
+
+    // 记录用户已回答这个问题
+    table::add(user_question_table, question_id, true);
+
+    // 如果答案正确，奖励积分
+    if (is_correct) {
+        // 铸造积分
+        let points = question.reward_points;
+        let points_coin = coin::mint<POINT_TOKEN>(&mut manager.treasury_cap, points, ctx);
+
+        // 转移给用户
+        transfer::public_transfer(points_coin, user);
+
+        // 发出事件
+        event::emit(QuizCompleted {
+            user,
+            question_id,
+            is_correct: true,
+            points_earned: points,
+        });
+    } else {
+        // 答案错误，只记录事件
+        event::emit(QuizCompleted {
+            user,
+            question_id,
+            is_correct: false,
+            points_earned: 0,
+        });
+    }
 }
 
 /**
-     * 查看解析（消耗积分）
-     * 用户支付积分以查看问题解析
-     * @param solution - 解析内容对象
-     * @param payment - 用户的代币支付
-     * @param ctx - 交易上下文
-     */
+ * 查看解析（消耗积分）
+ * 用户支付积分以查看问题解析
+ * @param solution - 解析内容对象
+ * @param payment - 用户的代币支付
+ * @param ctx - 交易上下文
+ */
 public entry fun view_solution(
     solution: &SolutionContent,
-    payment: &mut Coin<POINT>,
+    payment: &mut Coin<POINT_TOKEN>,
     ctx: &mut TxContext,
 ) {
     // 检查用户积分是否足够
@@ -248,31 +339,72 @@ public entry fun view_solution(
 }
 
 /**
-     * 更改管理员
-     * 修改管理器的管理员地址
-     * @param manager - 管理器实例
-     * @param new_admin - 新管理员地址
-     * @param ctx - 交易上下文
-     */
+ * 更改管理员
+ * 修改管理器的管理员地址
+ * @param manager - 管理器实例
+ * @param new_admin - 新管理员地址
+ * @param ctx - 交易上下文
+ */
 public entry fun change_admin(manager: &mut QuizManager, new_admin: address, ctx: &mut TxContext) {
     assert!(tx_context::sender(ctx) == manager.admin, ENotAuthorized);
     manager.admin = new_admin;
 }
 
 /**
-     * 获取解析内容
-     * @param solution - 解析内容对象
-     * @return 解析内容
-     */
+ * 铸造新代币给指定用户
+ * 任何人都可以调用该函数为其他用户铸造代币
+ * @param manager - 管理器实例
+ * @param amount - 铸造数量
+ * @param recipient - 接收者地址
+ * @param ctx - 交易上下文
+ */
+public entry fun mint_tokens(
+    manager: &mut QuizManager,
+    amount: u64,
+    recipient: address,
+    ctx: &mut TxContext,
+) {
+    // 铸造积分
+    let points_coin = coin::mint<POINT_TOKEN>(&mut manager.treasury_cap, amount, ctx);
+
+    // 转移给接收者
+    transfer::public_transfer(points_coin, recipient);
+
+    // 发出事件
+    event::emit(QuizCompleted {
+        user: recipient,
+        question_id: 0, // 不与问题关联
+        is_correct: true,
+        points_earned: amount,
+    });
+}
+
+// Getter 函数
+public fun get_question_content(question: &Question): string::String {
+    question.content
+}
+
+public fun get_question_id(question: &Question): u64 {
+    question.question_id
+}
+
+public fun get_question_reward(question: &Question): u64 {
+    question.reward_points
+}
+
 public fun get_solution_content(solution: &SolutionContent): string::String {
     solution.content
 }
 
-/**
-     * 获取解析费用
-     * @param solution - 解析内容对象
-     * @return 所需代币数量
-     */
 public fun get_solution_cost(solution: &SolutionContent): u64 {
     solution.token_cost
+}
+
+public fun has_answered_question(manager: &QuizManager, user: address, question_id: u64): bool {
+    if (!table::contains(&manager.user_answers, user)) {
+        return false
+    };
+
+    let user_question_table = table::borrow(&manager.user_answers, user);
+    table::contains(user_question_table, question_id)
 }

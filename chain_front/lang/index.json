@@ -364,5 +364,467 @@
 		"en": "Connected",
 		"ko": "접속됨",
 		"ja": "接続済み"
+	},
+	"g064o6y": {
+		"zh-cn": "请生成10道区块链相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 10 blockchain related multiple-choice questions, each with 4 options in JSON array format",
+		"ko": "10개의 블록체인 관련 선택 문제를 생성하십시오. 각 문제에는 4개의 옵션이 있습니다. 형식은 JSON 배열입니다.",
+		"ja": "10個のブロックチェーンに関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列をフォーマットしています"
+	},
+	"30goiob": {
+		"zh-cn": "无法解析返回的JSON",
+		"en": "Unable to parse the returned JSON",
+		"ko": "반환된 JSON을 확인할 수 없습니다.",
+		"ja": "戻されたJSONを解析できません"
+	},
+	"ghixcba": {
+		"zh-cn": "比特币的创始人是谁？",
+		"en": "Who is the founder of Bitcoin?",
+		"ko": "비트코인의 창시자는 누구입니까?",
+		"ja": "ビットコインの創始者は誰ですか。"
+	},
+	"tbnil4l": {
+		"zh-cn": "以太坊网络中用于支付计算资源的货币单位是？",
+		"en": "What is the currency unit used to pay for computing resources in the Ethereum network?",
+		"ko": "이더리움 네트워크에서 결제 계산 자원에 사용되는 화폐 단위는?",
+		"ja": "Ethernetネットワークで計算リソースを支払うために使用される通貨単位は？"
+	},
+	"5m1ovge": {
+		"zh-cn": "区块链的基本数据结构是什么？",
+		"en": "What is the basic data structure of blockchain?",
+		"ko": "블록체인의 기본 데이터 구조는 무엇입니까?",
+		"ja": "ブロックチェーンの基本的なデータ構造は何ですか。"
+	},
+	"q3ai2": {
+		"zh-cn": "链表",
+		"en": "Linked list",
+		"ko": "체인 테이블",
+		"ja": "チェーンメータ"
+	},
+	"hy6s2": {
+		"zh-cn": "数组",
+		"en": "array",
+		"ko": "배열",
+		"ja": "アレイ"
+	},
+	"cvsmc3": {
+		"zh-cn": "哈希表",
+		"en": "Hashtable",
+		"ko": "해시 시계",
+		"ja": "ハッシュテーブル"
+	},
+	"kdluls4": {
+		"zh-cn": "默克尔树",
+		"en": "Merkel tree",
+		"ko": "메르켈 트리",
+		"ja": "メルケルの木"
+	},
+	"eabzesc": {
+		"zh-cn": "一大波题库正在来临...",
+		"en": "A large wave of question banks is coming",
+		"ko": "큰 문제집이 오고 있는데...",
+		"ja": "大きな問題群が来ている…"
+	},
+	"l0ynuk5": {
+		"zh-cn": "测验完成！",
+		"en": "Test completed!",
+		"ko": "퀴즈 완료!",
+		"ja": "テスト完了！"
+	},
+	"wysk5o5": {
+		"zh-cn": "您的分数:",
+		"en": "Your score:",
+		"ko": "점수:",
+		"ja": "スコア:"
+	},
+	"itdrwu4": {
+		"zh-cn": "重新开始",
+		"en": "restart",
+		"ko": "다시 시작",
+		"ja": "再スタート"
+	},
+	"6jz6oz7": {
+		"zh-cn": "区块链知识测验",
+		"en": "Blockchain Knowledge Test",
+		"ko": "블록체인 지식 퀴즈",
+		"ja": "ブロックチェーン知識試験"
+	},
+	"qc8a2": {
+		"zh-cn": "问题",
+		"en": "problem",
+		"ko": "문제",
+		"ja": "問題"
+	},
+	"dng21l4": {
+		"zh-cn": "检查答案",
+		"en": "check the answers",
+		"ko": "답안 검토",
+		"ja": "答えをチェック"
+	},
+	"btmg33": {
+		"zh-cn": "下一题",
+		"en": "Next question",
+		"ko": "다음 문제",
+		"ja": "次の問題"
+	},
+	"bykzad4": {
+		"zh-cn": "完成测验",
+		"en": "Complete the quiz",
+		"ko": "퀴즈 완료",
+		"ja": "テストを完了する"
+	},
+	"9uocz89": {
+		"zh-cn": "测试你的区块链知识",
+		"en": "Test your blockchain knowledge",
+		"ko": "블록체인 지식 테스트",
+		"ja": "ブロックチェーンの知識をテスト"
+	},
+	"jhg3zwn": {
+		"zh-cn": "完成我们的区块链选择题测验，检验你的学习成果！",
+		"en": "Complete our blockchain multiple-choice test to test your learning outcomes!",
+		"ko": "우리의 블록체인 선택 문제 퀴즈를 완성하고, 당신의 학습 성과를 검증합니다!",
+		"ja": "私たちのブロックチェーン選択問題のテストを完了して、あなたの学習成果を検証します！"
+	},
+	"cd1tws4": {
+		"zh-cn": "开始测验",
+		"en": "Start the test",
+		"ko": "퀴즈 시작",
+		"ja": "テストを開始"
+	},
+	"i7bwwmx": {
+		"zh-cn": "请生成3道区块链相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 3 blockchain related multiple-choice questions, each with 4 options in JSON array format",
+		"ko": "3개의 블록체인 관련 선택 문제를 생성하십시오. 각 문제에는 4개의 옵션이 있습니다. 형식은 JSON 배열입니다.",
+		"ja": "3つのブロックチェーンに関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列の形式になっています"
+	},
+	"v1slm48": {
+		"zh-cn": "加载题目中...",
+		"en": "Loading the title",
+		"ko": "제목 로드 중...",
+		"ja": "タイトルをロード中..."
+	},
+	"fonrv77": {
+		"zh-cn": "✓ 回答正确!",
+		"en": "✓ Correct answer!",
+		"ko": "♦ 정답!",
+		"ja": "＄正解！"
+	},
+	"3jc4307": {
+		"zh-cn": "✗ 回答错误!",
+		"en": "✗ Incorrect answer!",
+		"ko": "땡 땡!",
+		"ja": "❝答えが間違っている！"
+	},
+	"jbaeav12": {
+		"zh-cn": "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
+		"en": "Please generate 3 multiple-choice questions related to the beginner Move language, each with 4 options in JSON array format",
+		"ko": "JSON 배열 형식으로 4개의 옵션이 있는 3개의 기본 Move 언어 관련 선택 문제를 생성하십시오.",
+		"ja": "3つの初級Move言語に関する選択問題を生成してください。各問題には4つの選択肢があり、JSON配列の形式になっています"
+	},
+	"zhxf5wo": {
+		"zh-cn": "区块链中，以下哪个特性是Sui区块链的独特优势？",
+		"en": "Which of the following features is the unique advantage of Sui blockchain in blockchain?",
+		"ko": "블록체인에서 다음 중 Sui 블록체인의 독특한 장점은 무엇입니까?",
+		"ja": "ブロックチェーンの中で、以下のどの特性がSuiブロックチェーンの独特な優位性ですか？"
+	},
+	"8i6buod": {
+		"zh-cn": "并行交易处理和对象级所有权",
+		"en": "Parallel transaction processing and object level ownership",
+		"ko": "동시 거래 처리 및 객체 수준 소유권",
+		"ja": "同時取引処理とオブジェクト・レベルの所有権"
+	},
+	"a49hvsj": {
+		"zh-cn": "使用Proof of Work共识算法",
+		"en": "Using the Proof of Work consensus algorithm",
+		"ko": "Proof of Work 합의 알고리즘 사용",
+		"ja": "Proof of Workコンセンサスアルゴリズムの使用"
+	},
+	"9qbr1c7": {
+		"zh-cn": "不支持智能合约",
+		"en": "Not supporting smart contracts",
+		"ko": "스마트 계약이 지원되지 않음",
+		"ja": "スマート契約はサポートされていません"
+	},
+	"y9chktf": {
+		"zh-cn": "只能发行不可替代代币(NFT)",
+		"en": "Can only issue non fungible tokens (NFTs)",
+		"ko": "대체 불가능한 토큰만 발행할 수 있음(NFT)",
+		"ja": "代替不可能なトークンのみ発行可能（NFT）"
+	},
+	"kdquqor": {
+		"zh-cn": "在Sui Move语言中，以下哪种类型是Sui特有的？",
+		"en": "Which of the following types is unique to Sui Move language?",
+		"ko": "Sui Move 언어에서 Sui 고유의 유형은 무엇입니까?",
+		"ja": "Sui Move言語では、以下のどのタイプがSui特有のものですか。"
+	},
+	"g6vofe4": {
+		"zh-cn": "答题演示",
+		"en": "Answer demonstration",
+		"ko": "퀴즈 프레젠테이션",
+		"ja": "クイズのデモンストレーション"
+	},
+	"sg518p5": {
+		"zh-cn": "当前积分:",
+		"en": "Current points:",
+		"ko": "현재 포인트:",
+		"ja": "現在の積分:"
+	},
+	"btlpe3": {
+		"zh-cn": "上一题",
+		"en": "Previous question",
+		"ko": "이전 문제",
+		"ja": "前の問題"
+	},
+	"od5m2": {
+		"zh-cn": "说明",
+		"en": "describe",
+		"ko": "설명",
+		"ja": "説明"
+	},
+	"fead3jw": {
+		"zh-cn": "这是一个答题演示页面，展示了如何与 Sui Move 合约交互。",
+		"en": "This is a quiz demonstration page that shows how to interact with the Sui Move contract.",
+		"ko": "Sui Move 계약과 상호 작용하는 방법을 보여주는 퀴즈 데모 페이지입니다.",
+		"ja": "Sui Move契約との対話方法を示すクイズデモページです。"
+	},
+	"tpgf8xq": {
+		"zh-cn": "正确回答问题可以获得积分奖励，查看解析需要消耗积分。",
+		"en": "Answering questions correctly can earn points rewards, while viewing and parsing requires the consumption of points.",
+		"ko": "질문에 정확하게 대답하면 포인트 보상을 받을 수 있습니다. 확인 시 포인트 소모가 필요합니다.",
+		"ja": "質問に正しく答えるとポイント奨励金がもらえ、解析を見るにはポイントを消費する必要があります。"
+	},
+	"ssfibbr": {
+		"zh-cn": "在实际应用中，积分会记录在区块链上，这里只是前端模拟。",
+		"en": "In practical applications, the points will be recorded on the blockchain, and this is just a front-end simulation.",
+		"ko": "실제 응용에서 포인트는 블록 체인에 기록되며 여기서는 프런트엔드 시뮬레이션에 불과합니다.",
+		"ja": "実際の用途では、積分はブロックチェーンに記録されますが、ここではフロントエンドシミュレーションのみです。"
+	},
+	"wn5ac4d": {
+		"zh-cn": "请先连接您的钱包以开始答题",
+		"en": "Please connect your wallet first to start answering the questions",
+		"ko": "먼저 지갑을 연결하여 퀴즈를 시작하십시오.",
+		"ja": "まず財布を接続して問題に答えてください"
+	},
+	"aezt94b": {
+		"zh-cn": "提交回答: 问题ID=",
+		"en": "Submit answer: Question ID=",
+		"ko": "제출 답변: 질문 ID=",
+		"ja": "コミット回答：質問ID="
+	},
+	"1akt6h5": {
+		"zh-cn": ", 选项=",
+		"en": ", Options=",
+		"ko": ", 옵션 =",
+		"ja": "、オプション="
+	},
+	"qywik76": {
+		"zh-cn": "合约调用: ",
+		"en": "Contract call:",
+		"ko": "계약 호출:",
+		"ja": "契約呼び出し："
+	},
+	"m7j9dtb": {
+		"zh-cn": "查看解析: 问题ID=",
+		"en": "View resolution: Problem ID=",
+		"ko": "확인 보기: 문제 ID=",
+		"ja": "解析の表示：問題ID="
+	},
+	"ulinr17": {
+		"zh-cn": ", 消耗积分=",
+		"en": ", consume points=",
+		"ko": ", 포인트 소모 =",
+		"ja": "、消費積分="
+	},
+	"a85fwhn": {
+		"zh-cn": "这是问题的详细解析内容。解答步骤如下：1...",
+		"en": "This is the detailed analysis of the problem. The answer steps are as follows: 1",
+		"ko": "이것은 문제의 상세한 해결 내용이다.답변 단계는 다음과 같습니다. 1...",
+		"ja": "これは問題の詳細な解析内容です。解答手順は次のとおりです。1…"
+	},
+	"ev0tfv6": {
+		"zh-cn": "提交中...",
+		"en": "Submitting",
+		"ko": "제출 중...",
+		"ja": "コミット中..."
+	},
+	"cxbsqw4": {
+		"zh-cn": "提交答案",
+		"en": "Submit answers",
+		"ko": "답안을 제출하다",
+		"ja": "回答の送信"
+	},
+	"cafghxb": {
+		"zh-cn": "恭喜！答案正确，获得 ",
+		"en": "congratulations! Correct answer, obtained",
+		"ko": "축하합니다!정답, 획득",
+		"ja": "おめでとう！答えが正しい"
+	},
+	"lul33": {
+		"zh-cn": " 积分",
+		"en": "points",
+		"ko": "포인트",
+		"ja": "せきぶん"
+	},
+	"k81cef8": {
+		"zh-cn": "很遗憾，答案错误",
+		"en": "Unfortunately, the answer is incorrect",
+		"ko": "유감스럽게도 답이 틀렸다",
+		"ja": "残念ながら、答えは間違っています"
+	},
+	"8jnov07": {
+		"zh-cn": "查看解析（消耗",
+		"en": "View parsing (consumption)",
+		"ko": "확인 보기 (소모",
+		"ja": "解析の表示（消費量）"
+	},
+	"iaaya3": {
+		"zh-cn": "积分）",
+		"en": "Points)",
+		"ko": "포인트)",
+		"ja": "積分）"
+	},
+	"kq3713": {
+		"zh-cn": "解析：",
+		"en": "Analysis:",
+		"ko": "해결:",
+		"ja": "解析："
+	},
+	"gwasf17": {
+		"zh-cn": "合约调用说明:",
+		"en": "Contract call instructions:",
+		"ko": "계약 호출 지침:",
+		"ja": "契約呼び出しの説明："
+	},
+	"rlmy098": {
+		"zh-cn": "1. 回答问题:",
+		"en": "1. Answer the question:",
+		"ko": "1. 질문에 답하기:",
+		"ja": "1.質問に答える："
+	},
+	"3ttndp8": {
+		"zh-cn": "2. 查看解析:",
+		"en": "2. View analysis:",
+		"ko": "2. 확인을 보려면 다음과 같이 하십시오.",
+		"ja": "2.解析の表示："
+	},
+	"l64ygpk": {
+		"zh-cn": "需要在实际应用中用以下步骤替换模拟代码:",
+		"en": "The simulation code needs to be replaced with the following steps in practical applications:",
+		"ko": "실제 응용 프로그램에서 다음 단계로 아날로그 코드를 대체해야 합니다.",
+		"ja": "シミュレーションコードを実際のアプリケーションで次の手順で置き換える必要があります。"
+	},
+	"ubxqp418": {
+		"zh-cn": "导入需要的钱包API，如useWallet和useTransactionExecutor",
+		"en": "Import the required wallet APIs, such as useWallet and useTransactionExecutor",
+		"ko": "useWallet 및 useTransactionExecutor와 같은 필요한 지갑 API 가져오기",
+		"ja": "useWalletやuseTransactionExecutorなど、必要なウォレットAPIをインポートする"
+	},
+	"sykthed": {
+		"zh-cn": "构建交易并使用钱包签名执行",
+		"en": "Build transactions and execute them using wallet signatures",
+		"ko": "거래 구축 및 지갑 서명 사용",
+		"ja": "トランザクションを構築し、ウォレット署名を使用して実行する"
+	},
+	"ckh732d": {
+		"zh-cn": "监听交易结果并更新UI状态",
+		"en": "Monitor transaction results and update UI status",
+		"ko": "트랜잭션 결과 수신 및 UI 상태 업데이트",
+		"ja": "取引結果を傍受し、UIステータスを更新する"
+	},
+	"u1diepg": {
+		"zh-cn": "Token余额不足，无法查看解析",
+		"en": "Insufficient Token balance, unable to view and parse",
+		"ko": "Token 잔액이 부족하여 확인을 볼 수 없습니다.",
+		"ja": "Token残高が不足して解析を表示できません"
+	},
+	"tcf62p5": {
+		"zh-cn": "你的积分:",
+		"en": "Your points:",
+		"ko": "당신의 포인트:",
+		"ja": "あなたのポイント："
+	},
+	"kkdcmoa": {
+		"zh-cn": "请连接钱包以查看积分",
+		"en": "Please connect your wallet to view your points",
+		"ko": "지갑을 연결하여 포인트를 확인하십시오.",
+		"ja": "ウォレットに接続してポイントを確認してください"
+	},
+	"y4umimf": {
+		"zh-cn": "✓ 回答正确! 获得10积分!",
+		"en": "✓ Correct answer! Get 10 points!",
+		"ko": "♦ 정답!10포인트 획득!",
+		"ja": "＄正解！ポイント10獲得！"
+	},
+	"degxhy8": {
+		"zh-cn": "查看解析 (消耗",
+		"en": "View parsing (consumption)",
+		"ko": "확인 보기 (소모",
+		"ja": "解析の表示（消費量）"
+	},
+	"i8wlu3": {
+		"zh-cn": "积分)",
+		"en": "Points)",
+		"ko": "포인트)",
+		"ja": "積分）"
+	},
+	"7hr0rs8": {
+		"zh-cn": "恭喜！你获得了 ",
+		"en": "congratulations! You got it",
+		"ko": "축하합니다!네가 얻었어",
+		"ja": "おめでとう！あなたが手に入れた"
+	},
+	"5eu7zj6": {
+		"zh-cn": " 积分奖励!",
+		"en": "Points reward!",
+		"ko": "포인트 보상!",
+		"ja": "ポイントボーナス！"
+	},
+	"x0q8suj": {
+		"zh-cn": "积分奖励失败，请检查钱包连接或稍后重试",
+		"en": "Points reward failed, please check wallet connection or try again later",
+		"ko": "포인트 보상 실패, 지갑 연결을 확인하거나 나중에 다시 시도하십시오.",
+		"ja": "ポイントボーナスに失敗しました。ウォレット接続を確認するか、後で再試行してください"
+	},
+	"hszmium": {
+		"zh-cn": "查看解析失败，请确保你有足够的积分或稍后重试",
+		"en": "Viewing parsing failed, please make sure you have enough points or try again later",
+		"ko": "확인 실패, 충분한 포인트가 있는지 확인하거나 나중에 다시 시도하십시오.",
+		"ja": "解析に失敗した場合は、十分な積分があることを確認するか、後で再試行してください"
+	},
+	"u5bstf6": {
+		"zh-cn": "处理中...",
+		"en": "Processing in progress",
+		"ko": "처리 중...",
+		"ja": "処理中..."
+	},
+	"7l8nz66": {
+		"zh-cn": "领取积分奖励",
+		"en": "Claim point rewards",
+		"ko": "포인트 보상 수령",
+		"ja": "ポイントインセンティブを受け取る"
+	},
+	"ht9eqw4": {
+		"zh-cn": "解析ID",
+		"en": "Resolve ID",
+		"ko": "확인 ID",
+		"ja": "解析ID"
+	},
+	"abyqe14": {
+		"zh-cn": "代币ID",
+		"en": "Token ID",
+		"ko": "토큰 ID",
+		"ja": "トークンID"
+	},
+	"k6dp3cd": {
+		"zh-cn": "查看详细解析 (消耗积分)",
+		"en": "View detailed analysis (consumption of points)",
+		"ko": "상세 확인 보기 (포인트 사용)",
+		"ja": "詳細解析の表示（消費積分）"
+	},
+	"h7x0jwc": {
+		"zh-cn": "连接钱包以使用区块链功能",
+		"en": "Connect wallet to use blockchain functionality",
+		"ko": "블록체인 기능을 사용하기 위해 지갑 연결",
+		"ja": "ブロックチェーン機能を使用するウォレットの接続"
 	}
 }
