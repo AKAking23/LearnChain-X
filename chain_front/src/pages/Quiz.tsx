@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { sendMessageToCoze, verifyAnswer } from "../api/coze";
+import { createDirectRewardParams } from "../api/sui";
 import "../styles/Quiz.css"; // 需要创建这个CSS文件
+import { TESTNET_QUIZMANAGER_ID } from "@/utils/constants";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 
 interface QuizQuestion {
   id?: number;
@@ -23,6 +26,9 @@ const Quiz: React.FC = () => {
     correctAnswer: string | number;
     explanation?: string;
   } | null>(null);
+  
+  const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   useEffect(() => {
     const fetchQuizQuestions = async () => {
@@ -31,7 +37,9 @@ const Quiz: React.FC = () => {
         // 从localStorage检查是否已经缓存了题目
         const cachedQuestions = localStorage.getItem("quizQuestions");
         // 生成或获取用户ID
-        const userId = localStorage.getItem("userId") || `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const userId =
+          localStorage.getItem("userId") ||
+          `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
         localStorage.setItem("userId", userId);
 
         if (cachedQuestions) {
@@ -40,33 +48,37 @@ const Quiz: React.FC = () => {
         } else {
           // 如果没有缓存，则调用API获取题目
           const response = await sendMessageToCoze({
-            input: "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
-            userId: userId
+            input:
+              "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
+            userId: userId,
           });
-          
+
           // 处理返回的数据
           if (response.status === "success") {
             let questions = [];
-            
+
             // 尝试从不同位置提取题目数据
             if (response.data?.output && Array.isArray(response.data.output)) {
               // 标准格式
               questions = response.data.output;
-            } else if (typeof response.data === 'string') {
+            } else if (typeof response.data === "string") {
               // 如果data是字符串，尝试解析
               try {
                 const parsedData = JSON.parse(response.data);
-                questions = Array.isArray(parsedData) ? parsedData : 
-                           (parsedData.output && Array.isArray(parsedData.output) ? parsedData.output : []);
+                questions = Array.isArray(parsedData)
+                  ? parsedData
+                  : parsedData.output && Array.isArray(parsedData.output)
+                  ? parsedData.output
+                  : [];
               } catch (e) {
                 console.error("解析字符串数据失败", e);
               }
             }
-            
+
             if (questions.length > 0) {
               setQuestions(questions);
               // 缓存到localStorage
-              localStorage.setItem('quizQuestions', JSON.stringify(questions));
+              localStorage.setItem("quizQuestions", JSON.stringify(questions));
             } else {
               // 如果未能提取到题目数据，使用默认题目
               setQuestions(getDefaultQuestions());
@@ -133,22 +145,45 @@ const Quiz: React.FC = () => {
 
   const handleCheckAnswer = async () => {
     if (selectedOption === null) return;
-    
     try {
       const userId = localStorage.getItem("userId") || "default";
       const result = await verifyAnswer({
         questionIndex: currentQuestionIndex,
         selectedOption: selectedOption,
-        userId: userId
+        userId: userId,
       });
-      
+
       if (result.status === "success") {
         setAnswerResult(result.data);
         setShowAnswer(true);
         
-        // 如果答案正确，增加分数
-        if (result.data.isCorrect) {
+        // 如果答案正确，增加分数并调用合约奖励用户
+        if (result.data.isCorrect && currentAccount) {
           setScore(score + 1);
+
+          try {
+            // 奖励积分数量
+            const rewardAmount = 1000000000;
+            
+            // 使用useSignAndExecuteTransaction的mutate方法执行交易
+            signAndExecuteTransaction(
+              createDirectRewardParams(
+                TESTNET_QUIZMANAGER_ID,
+                currentAccount.address,
+                rewardAmount
+              ),
+              {
+                onSuccess: (result) => {
+                  console.log("奖励积分成功!", result);
+                },
+                onError: (error) => {
+                  console.error("奖励积分失败:", error);
+                }
+              }
+            );
+          } catch (walletError) {
+            console.error("调用钱包或合约失败:", walletError);
+          }
         }
       }
     } catch (error) {
@@ -193,7 +228,7 @@ const Quiz: React.FC = () => {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  
+
   // 如果没有题目，显示加载中
   if (!currentQuestion) {
     return (
@@ -283,10 +318,13 @@ const Quiz: React.FC = () => {
 };
 
 // 辅助函数，判断选项是否为正确选项
-const isCorrectOption = (correctAnswer: string | number, optionIndex: number): boolean => {
-  if (typeof correctAnswer === 'number') {
+const isCorrectOption = (
+  correctAnswer: string | number,
+  optionIndex: number
+): boolean => {
+  if (typeof correctAnswer === "number") {
     return optionIndex === correctAnswer;
-  } else if (typeof correctAnswer === 'string') {
+  } else if (typeof correctAnswer === "string") {
     // 检查是否以字母前缀开头 (如 A. B. C. 等)
     if (/^[A-D]\.?\s/.test(correctAnswer)) {
       const letterIndex = correctAnswer.charCodeAt(0) - 65; // 'A' 的 ASCII 码是 65
@@ -294,8 +332,10 @@ const isCorrectOption = (correctAnswer: string | number, optionIndex: number): b
     }
     // 直接匹配内容
     const optionLetter = String.fromCharCode(65 + optionIndex);
-    return correctAnswer.startsWith(optionLetter) || 
-           correctAnswer.toLowerCase().includes(optionLetter.toLowerCase());
+    return (
+      correctAnswer.startsWith(optionLetter) ||
+      correctAnswer.toLowerCase().includes(optionLetter.toLowerCase())
+    );
   }
   return false;
 };
