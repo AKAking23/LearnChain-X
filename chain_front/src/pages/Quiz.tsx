@@ -569,7 +569,7 @@ const Quiz: React.FC = () => {
       {process.env.NODE_ENV === "development" && (
         <div
           className="admin-buttons"
-          style={{ marginTop: "20px", display: "flex", gap: "10px" }}
+          style={{ marginTop: "20px", display: "none", gap: "10px" }}
         >
           <Button
             onClick={handleAddSimpleQuestion}

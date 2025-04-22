@@ -118,12 +118,14 @@ const Dashboard: React.FC = () => {
   const moveTitle = (x: number, y: number) => {
     // 为移动设备调整移动距离
     const factor = isMobile ? 20 : 40;
-    
+
     // 更新距离:以屏幕中心为基准。将距离与屏幕尺寸绑定：避免不同尺寸下移动距离差异过大
     // const distanceX = ((x - window.innerWidth / 2) / window.innerWidth) * factor;
-    const distanceX = ((x - window.innerWidth / 3) / window.innerWidth) * factor;
+    const distanceX =
+      ((x - window.innerWidth / 3) / window.innerWidth) * factor;
     // const distanceY = ((y - window.innerHeight / 2) / window.innerHeight) * factor;
-    const distanceY = ((y - window.innerHeight / 3) / window.innerHeight) * factor;
+    const distanceY =
+      ((y - window.innerHeight / 3) / window.innerHeight) * factor;
 
     // 移动标题
     gsap.to(titleRef.current, {
@@ -167,8 +169,8 @@ const Dashboard: React.FC = () => {
   };
 
   // 导航函数替代全局存储的方法
-  const startNewGame = () => {
-    hidden(undefined, () => navigate("/game/new"));
+  const startNewGame = (difficulty: string) => {
+    hidden(undefined, () => navigate(`/quiz?difficulty=${difficulty}`));
   };
 
   // const continueGame = () => {
@@ -177,13 +179,13 @@ const Dashboard: React.FC = () => {
   //   }
   // };
 
-  const showRank = () => {
-    hidden(undefined, () => navigate("/rank"));
-  };
+  // const showRank = () => {
+  //   hidden(undefined, () => navigate("/rank"));
+  // };
 
-  const showInstructions = () => {
-    hidden(undefined, () => navigate("/instructions"));
-  };
+  // const showInstructions = () => {
+  //   hidden(undefined, () => navigate("/instructions"));
+  // };
 
   // 检查是否是移动设备
   const checkMobile = () => {
@@ -196,7 +198,7 @@ const Dashboard: React.FC = () => {
       // 小球的移动范围局限在大球的周围
       maxDistanceRef.current = bigballRef.current.offsetWidth / 2.5;
     }
-    
+
     // 检查设备类型
     checkMobile();
   };
@@ -211,7 +213,7 @@ const Dashboard: React.FC = () => {
     // };
 
     // checkPlayerActive();
-    
+
     // 初始化检查设备类型
     checkMobile();
 
@@ -351,30 +353,30 @@ const Dashboard: React.FC = () => {
           className="welcome_nav_selection"
           style={{ "--i": 0 } as React.CSSProperties}
         >
-          <div className="wns_node" onClick={startNewGame}>
+          <div className="wns_node" onClick={() => startNewGame('primary')}>
             <div></div>
-            <p className="_font_2">NEW GAME</p>
-          </div>
-        </div>
-        <div
-          className="welcome_nav_selection"
-          style={{ "--i": 1 } as React.CSSProperties}
-        >
-          <div className="wns_node" onClick={startNewGame}>
-            <div></div>
-            <p className="_font_2">NEW GAME</p>
+            <p className="_font_2">Primary</p>
           </div>
         </div>
         <div
           className="welcome_nav_selection"
           style={{ "--i": 2 } as React.CSSProperties}
         >
-          <div className="wns_node" onClick={showRank}>
+          <div className="wns_node" onClick={() => startNewGame('intermediate')}>
             <div></div>
-            <p className="_font_2">RANK</p>
+            <p className="_font_2">Intermediate</p>
           </div>
         </div>
         <div
+          className="welcome_nav_selection"
+          style={{ "--i": 4 } as React.CSSProperties}
+        >
+          <div className="wns_node" onClick={() => startNewGame('advanced')}>
+            <div></div>
+            <p className="_font_2">Advanced</p>
+          </div>
+        </div>
+        {/* <div
           className="welcome_nav_selection"
           style={{ "--i": 3 } as React.CSSProperties}
         >
@@ -382,7 +384,7 @@ const Dashboard: React.FC = () => {
             <div></div>
             <p className="_font_2">INSTRUTION</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
