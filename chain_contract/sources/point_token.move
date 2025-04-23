@@ -8,6 +8,7 @@ module chain_contract::point_token;
 
 use std::option;
 use std::string;
+use std::ascii;
 use sui::balance::{Self, Balance};
 use sui::coin::{Self, Coin, TreasuryCap};
 use sui::event;
@@ -16,6 +17,7 @@ use sui::package;
 use sui::table::{Self, Table};
 use sui::transfer;
 use sui::tx_context::{Self, TxContext};
+use sui::url;
 
 // 错误码定义
 /// 代币余额不足错误
@@ -131,7 +133,7 @@ fun init(witness: POINT_TOKEN, ctx: &mut TxContext) {
         b"POINT", // 符号
         b"Quiz Points", // 名称
         b"Points earned from answering questions correctly", // 描述
-        option::none(), // 图标URL
+        option::some(url::new_unsafe(std::ascii::string(b"https://learnchainx.netlify.app/logo.png"))), // 图标URL
         ctx,
     );
 
