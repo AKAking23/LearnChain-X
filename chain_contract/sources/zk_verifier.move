@@ -65,7 +65,17 @@ public entry fun create_verifier(ctx: &mut TxContext) {
     // 共享验证器对象，使其全局可访问
     transfer::share_object(verifier);
 }
-
+fun init(ctx: &mut TxContext) {
+    // 创建验证器对象并共享
+    let verifier = ZkVerifier {
+        id: object::new(ctx),
+        // admin: tx_context::sender(ctx),
+        admin: @0xe75a090888082e699c99b6877f93aaacedba68cd172f32006605e76b99260bb8,
+        verification_keys: table::new(ctx),
+    };
+    
+    transfer::share_object(verifier);
+}
 // ===== 公共函数 =====
 
 /// 添加验证密钥

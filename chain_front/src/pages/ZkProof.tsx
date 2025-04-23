@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
 // import { useWallet } from "@suiet/wallet-kit";
-import { useCurrentAccount } from "@mysten/dapp-kit";
-import { generateAbilityProof } from "../utils/zkProof";
-import Loading from "../components/Loading";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+} from "@mysten/dapp-kit";
+import {
+  generateAbilityProof,
+  getVerifierId,
+  getVerificationKey,
+} from "../utils/zkProof";
+import {
+  createVerifyZkProofParams,
+  createAddVerificationKeyParams,
+} from "../api/sui";
+import { Loader2 } from "lucide-react";
 
 // 样式定义
 const styles = {
@@ -98,15 +109,18 @@ const styles = {
 
 const ZkProof: React.FC = () => {
   const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const [userSbtLevel, setUserSbtLevel] = useState<number>(1); // 默认为中级
   const [requiredLevel, setRequiredLevel] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [isAddingKey, setIsAddingKey] = useState<boolean>(false);
   const [proof, setProof] = useState<string>("");
   const [publicInputs, setPublicInputs] = useState<string>("");
   const [verificationResult, setVerificationResult] = useState<boolean | null>(
     null
   );
+  const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
 
   // 模拟的SBT ID (在实际应用中应从链上查询用户的SBT)
   const mockSbtId = BigInt("123456789");
@@ -145,21 +159,41 @@ const ZkProof: React.FC = () => {
   };
 
   const handleVerifyProof = async () => {
-    if (!proof || !publicInputs) {
-      alert(`请先生成证明！`);
+    if (!proof || !publicInputs || !currentAccount) {
+      alert(`请先生成证明或连接钱包！`);
       return;
     }
 
     setIsVerifying(true);
 
     try {
-      // 模拟向合约发送验证请求
-      // 实际上应该调用Sui链上的合约进行验证
-      setTimeout(() => {
-        setVerificationResult(true);
-        alert("证明验证成功！");
-        setIsVerifying(false);
-      }, 2000);
+      // 获取验证器对象ID
+      const verifierId = await getVerifierId();
+      const circuitName = "ability"; // 电路名称
+
+      // 创建并执行交易
+      const txParams = createVerifyZkProofParams(
+        verifierId,
+        circuitName,
+        proof,
+        publicInputs,
+        requiredLevel
+      );
+
+      signAndExecute(txParams, {
+        onSuccess: (result) => {
+          console.log("交易成功:", result);
+          setVerificationResult(true);
+          alert("证明验证成功！");
+          setIsVerifying(false);
+        },
+        onError: (error) => {
+          console.error("交易失败:", error);
+          setVerificationResult(false);
+          alert("证明验证失败: " + error.message);
+          setIsVerifying(false);
+        },
+      });
     } catch (error) {
       console.error("验证证明失败:", error);
       alert("验证证明失败: " + (error as Error).message);
@@ -168,9 +202,90 @@ const ZkProof: React.FC = () => {
     }
   };
 
+  // 处理添加验证密钥
+  const handleAddVerificationKey = async () => {
+    if (!currentAccount) {
+      alert(`请先连接钱包！`);
+      return;
+    }
+
+    setIsAddingKey(true);
+
+    try {
+      // 获取验证器ID
+      const verifierId = await getVerifierId();
+      const circuitName = "ability"; // 电路名称
+
+      // 获取验证密钥
+      const verificationKey = await getVerificationKey();
+
+      // 创建添加验证密钥的交易
+      const txParams = createAddVerificationKeyParams(
+        verifierId,
+        circuitName,
+        verificationKey
+      );
+
+      // 执行交易
+      signAndExecute(txParams, {
+        onSuccess: (result) => {
+          console.log("添加验证密钥成功:", result);
+          alert("添加验证密钥成功！");
+          setIsAddingKey(false);
+        },
+        onError: (error) => {
+          console.error("添加验证密钥失败:", error);
+          alert("添加验证密钥失败: " + error.message);
+          setIsAddingKey(false);
+        },
+      });
+    } catch (error) {
+      console.error("添加验证密钥失败:", error);
+      alert("添加验证密钥失败: " + (error as Error).message);
+      setIsAddingKey(false);
+    }
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>零知识能力证明</h1>
+
+      {/* 管理员面板切换按钮 */}
+      <div style={{ textAlign: "right", marginBottom: "1rem" }}>
+        <button
+          style={{
+            ...styles.button,
+            backgroundColor: "#6b7280",
+            padding: "0.5rem 1rem",
+          }}
+          onClick={() => setShowAdminPanel(!showAdminPanel)}
+        >
+          {showAdminPanel ? "隐藏管理员面板" : "显示管理员面板"}
+        </button>
+      </div>
+
+      {/* 管理员面板 */}
+      {showAdminPanel && (
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>管理员面板</h2>
+          <div style={styles.card}>
+            <p style={styles.description}>
+              添加验证密钥是验证零知识证明的必要步骤。只有验证器的管理员才能执行此操作。
+            </p>
+            <button
+              style={styles.button}
+              onClick={handleAddVerificationKey}
+              disabled={isAddingKey}
+            >
+              {isAddingKey ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "添加验证密钥"
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={styles.section}>
         <h2 style={styles.sectionTitle}>什么是零知识证明？</h2>
@@ -220,7 +335,7 @@ const ZkProof: React.FC = () => {
             onClick={handleGenerateProof}
             disabled={isGenerating || !currentAccount}
           >
-            {isGenerating ? <Loading size={20} /> : "生成证明"}
+            {isGenerating ? <Loader2 className="animate-spin" /> : "生成证明"}
           </button>
         </div>
       </div>
@@ -253,7 +368,7 @@ const ZkProof: React.FC = () => {
               onClick={handleVerifyProof}
               disabled={isVerifying}
             >
-              {isVerifying ? <Loading size={20} /> : "验证证明"}
+              {isVerifying ? <Loader2 className="animate-spin" /> : "验证证明"}
             </button>
           </div>
         </div>

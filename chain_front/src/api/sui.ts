@@ -304,6 +304,112 @@ export function createAddSimpleQuestionParams(
   };
 }
 
+/**
+ * 创建交易对象用于验证零知识证明
+ * @param verifierId - 验证器对象ID
+ * @param circuit_name - 电路名称
+ * @param proof - 证明字符串
+ * @param public_inputs - 公共输入字符串
+ * @param required_level - 要求的能力等级
+ * @returns 交易对象
+ */
+export function createVerifyZkProofTransaction(
+  verifierId: string,
+  circuit_name: string,
+  proof: string,
+  public_inputs: string,
+  required_level: number
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${CONTRACT_ADDRESS}::zk_verifier::verify_proof`,
+    arguments: [
+      tx.object(verifierId), // 验证器对象实例
+      tx.pure.string(circuit_name), // 电路名称
+      tx.pure.string(proof), // 证明字符串
+      tx.pure.string(public_inputs), // 公共输入字符串
+      tx.pure.u64(required_level), // 要求等级
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * 创建验证零知识证明的交易参数
+ * @param verifierId - 验证器对象ID
+ * @param circuit_name - 电路名称
+ * @param proof - 证明字符串
+ * @param public_inputs - 公共输入字符串
+ * @param required_level - 要求的能力等级
+ * @returns 签名执行交易参数
+ */
+export function createVerifyZkProofParams(
+  verifierId: string,
+  circuit_name: string,
+  proof: string,
+  public_inputs: string,
+  required_level: number
+): { transaction: Transaction } {
+  return {
+    transaction: createVerifyZkProofTransaction(
+      verifierId,
+      circuit_name,
+      proof,
+      public_inputs,
+      required_level
+    ),
+  };
+}
+
+/**
+ * 创建交易对象用于添加验证密钥
+ * @param verifierId - 验证器对象ID
+ * @param circuit_name - 电路名称
+ * @param verification_key - 验证密钥JSON字符串
+ * @returns 交易对象
+ */
+export function createAddVerificationKeyTransaction(
+  verifierId: string,
+  circuit_name: string,
+  verification_key: string
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${CONTRACT_ADDRESS}::zk_verifier::add_verification_key`,
+    arguments: [
+      tx.object(verifierId), // 验证器对象实例
+      tx.pure.string(circuit_name), // 电路名称
+      tx.pure.string(verification_key), // 验证密钥JSON字符串
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * 创建添加验证密钥的交易参数
+ * @param verifierId - 验证器对象ID
+ * @param circuit_name - 电路名称
+ * @param verification_key - 验证密钥JSON字符串
+ * @returns 签名执行交易参数
+ */
+export function createAddVerificationKeyParams(
+  verifierId: string,
+  circuit_name: string,
+  verification_key: string
+): { transaction: Transaction } {
+  return {
+    transaction: createAddVerificationKeyTransaction(
+      verifierId,
+      circuit_name,
+      verification_key
+    ),
+  };
+}
+
 export default {
   createRewardTransaction,
   createDirectRewardTransaction,
@@ -316,5 +422,9 @@ export default {
   createMintSBTParams,
   createSelfMintSBTTransaction,
   createSelfMintSBTParams,
+  createVerifyZkProofTransaction,
+  createVerifyZkProofParams,
+  createAddVerificationKeyTransaction,
+  createAddVerificationKeyParams,
   CONTRACT_ADDRESS,
 };
