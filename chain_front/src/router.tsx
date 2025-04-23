@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import Wallet from './pages/Wallet';
 import Quiz from './pages/Quiz';
+import ZkProof from './pages/ZkProof';
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: 'quiz',
         element: <Quiz />
+      },
+      {
+        path: 'zkproof',
+        element: <ZkProof />
       },
       {
         path: '*',
