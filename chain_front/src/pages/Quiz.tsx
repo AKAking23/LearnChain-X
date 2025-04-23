@@ -25,9 +25,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 // 导入徽章图片
-import primaryBadge from "https://learnchainx.netlify.app/primary.png";
-import intermediateBadge from "https://learnchainx.netlify.app/intermediate.png";
-import advancedBadge from "https://learnchainx.netlify.app/advanced.png";
+// import primaryBadge from "https://learnchainx.netlify.app/primary.png";
+// import intermediateBadge from "https://learnchainx.netlify.app/intermediate.png";
+// import advancedBadge from "https://learnchainx.netlify.app/advanced.png";
 
 interface QuizQuestion {
   id?: number;
@@ -471,22 +471,24 @@ const Quiz: React.FC = () => {
         case 'primary':
           sbtName = "LearnChain-X 初级答题达人";
           sbtDescription = "恭喜完成LearnChain-X初级难度的所有问题并答对全部题目，获得初级答题达人成就！";
-          sbtUrl = primaryBadge; // 使用导入的初级徽章图片
+          // sbtUrl = primaryBadge; // 使用导入的初级徽章图片
+          sbtUrl = 'https://learnchainx.netlify.app/primary.png'; // 使用导入的初级徽章图片
+          
           break;
         case 'intermediate':
           sbtName = "LearnChain-X 中级答题达人";
           sbtDescription = "恭喜完成LearnChain-X中级难度的所有问题并答对全部题目，获得中级答题达人成就！";
-          sbtUrl = intermediateBadge; // 使用导入的中级徽章图片
+          sbtUrl = 'https://learnchainx.netlify.app/intermediate.png'; // 使用导入的中级徽章图片
           break;
         case 'advanced':
           sbtName = "LearnChain-X 高级答题达人";
           sbtDescription = "恭喜完成LearnChain-X高级难度的所有问题并答对全部题目，获得高级答题达人成就！这证明了您在Move语言方面的专业知识！";
-          sbtUrl = advancedBadge; // 使用导入的高级徽章图片
+          sbtUrl = 'https://learnchainx.netlify.app/advanced.png'; // 使用导入的中级徽章图片
           break;
         default:
           sbtName = "LearnChain-X 答题达人";
           sbtDescription = "恭喜完成LearnChain-X所有问题并答对全部题目，赢得此成就徽章！";
-          sbtUrl = primaryBadge; // 默认使用初级徽章图片
+          sbtUrl = 'https://learnchainx.netlify.app/primary.png'; // 使用导入的初级徽章图片
       }
       
       // 创建并执行自助铸造SBT的交易
