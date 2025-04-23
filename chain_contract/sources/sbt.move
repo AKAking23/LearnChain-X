@@ -26,7 +26,8 @@ const EConditionNotMet: u64 = 3;
      * SBT主对象，由用户拥有
      * 代表一个不可转让的灵魂绑定代币
      */
-public struct SoulboundToken has key, store {
+// public struct SoulboundToken has key, store {
+public struct SoulboundToken has key {
     id: UID,
     /// SBT名称
     name: String,
@@ -182,18 +183,18 @@ public entry fun self_mint_achievement(
 ) {
     // 验证条件：分数必须等于总题目数（即全部答对）
     assert!(quiz_score == total_questions && total_questions > 0, EConditionNotMet);
-    
+
     // 创建属性表
     let mut attributes = table::new<String, String>(ctx);
-    
+
     // 添加成就相关属性（使用预定义的字符串值，而不是尝试转换数字）
     table::add(&mut attributes, string::utf8(b"quiz_score"), string::utf8(b"perfect_score"));
     table::add(&mut attributes, string::utf8(b"total_questions"), string::utf8(b"all_correct"));
     table::add(&mut attributes, string::utf8(b"achievement_type"), string::utf8(b"quiz_master"));
-    
+
     // 获取交易发送者
     let recipient = tx_context::sender(ctx);
-    
+
     // 创建SBT对象
     let sbt = SoulboundToken {
         id: object::new(ctx),
