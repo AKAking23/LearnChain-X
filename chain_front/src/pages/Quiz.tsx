@@ -1,18 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   sendMessageToCoze,
   verifyAnswer,
   getQuestionSolution,
 } from "../api/coze";
-import { createDirectRewardParams } from "../api/sui";
+import {
+  createDirectRewardParams,
+  createViewSolutionSimpleTransaction,
+  createAddSimpleQuestionParams,
+  createSelfMintSBTParams,
+  CONTRACT_ADDRESS,
+} from "../api/sui";
 import "../styles/Quiz.css"; // 需要创建这个CSS文件
-import { TESTNET_QUIZMANAGER_ID } from "@/utils/constants";
+import { 
+  TESTNET_QUIZMANAGER_ID, 
+  TESTNET_REGISTRY_ID
+} from "@/utils/constants";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
+  useSuiClient,
 } from "@mysten/dapp-kit";
 import { Button } from "@/components/ui/button";
+
+// 导入徽章图片
+import primaryBadge from "../assets/images/primary.png";
+import intermediateBadge from "../assets/images/intermediate.png";
+import advancedBadge from "../assets/images/advanced.png";
+
 interface QuizQuestion {
   id?: number;
   question: string;
@@ -21,6 +37,9 @@ interface QuizQuestion {
 }
 
 const Quiz: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const difficulty = searchParams.get('difficulty') || 'primary';
+  
   const [loading, setLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
@@ -34,16 +53,98 @@ const Quiz: React.FC = () => {
     correctOptionLetter?: string;
     explanation?: string;
   } | null>(null);
+  const [sbtAwarded, setSbtAwarded] = useState<boolean>(false);
 
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  // userCoinId已经不再用于查看解析功能，但仍保留用于获取和显示代币余额
+  const [userCoinId, setUserCoinId] = useState<string | null>(null);
+  const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
+
+  // 获取用户代币ID和余额的函数
+  const getUserCoinId = async (address: string) => {
+    try {
+      if (!address) return null;
+
+      // 获取用户拥有的所有代币
+      const coins = await suiClient.getCoins({
+        owner: address,
+        coinType: `${CONTRACT_ADDRESS}::point_token::POINT_TOKEN`,
+      });
+      console.log(coins, "coins----");
+
+      // 如果用户有代币，返回第一个代币的ID
+      if (coins && coins.data && coins.data.length > 0) {
+        // 计算总余额
+        let totalBalance = 0n;
+        for (const coin of coins.data) {
+          if (coin.balance) {
+            totalBalance += BigInt(coin.balance);
+          }
+        }
+
+        // 更新余额状态（转换为可读格式，假设代币有9位小数）
+        const formattedBalance = formatTokenBalance(totalBalance);
+        setUserTokenBalance(formattedBalance);
+
+        return coins.data[0].coinObjectId;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("获取用户代币失败:", error);
+      return null;
+    }
+  };
+
+  // 格式化代币余额的辅助函数
+  const formatTokenBalance = (balance: bigint): string => {
+    const decimals = 9; // 假设代币有9位小数
+    const divisor = BigInt(10 ** decimals);
+
+    if (balance === 0n) return "0";
+
+    const integerPart = balance / divisor;
+    const fractionalPart = balance % divisor;
+
+    if (fractionalPart === 0n) {
+      return integerPart.toString();
+    }
+
+    // 确保小数部分有正确的前导零
+    let fractionalStr = fractionalPart.toString().padStart(decimals, "0");
+    // 移除尾部的0
+    fractionalStr = fractionalStr.replace(/0+$/, "");
+
+    return `${integerPart}.${fractionalStr}`;
+  };
+
+  // 手动刷新代币余额
+  const refreshTokenBalance = async () => {
+    if (currentAccount) {
+      await getUserCoinId(currentAccount.address);
+    }
+  };
+
+  // 在组件挂载和用户账户变更时获取用户代币ID和余额
+  useEffect(() => {
+    if (currentAccount) {
+      getUserCoinId(currentAccount.address).then((coinId) => {
+        setUserCoinId(coinId);
+      });
+    } else {
+      setUserTokenBalance("0"); // 重置余额
+      setUserCoinId(null);
+    }
+  }, [currentAccount]);
 
   useEffect(() => {
     const fetchQuizQuestions = async () => {
       try {
         setLoading(true);
         // 从localStorage检查是否已经缓存了题目
-        const cachedQuestions = localStorage.getItem("quizQuestions");
+        const cachedQuestions = localStorage.getItem(`quizQuestions_${difficulty}`);
         // 生成或获取用户ID
         const userId =
           localStorage.getItem("userId") ||
@@ -55,9 +156,24 @@ const Quiz: React.FC = () => {
           setLoading(false);
         } else {
           // 如果没有缓存，则调用API获取题目
+          // 根据难度级别调整提示词
+          let prompt = "";
+          switch(difficulty) {
+            case 'primary':
+              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            case 'intermediate':
+              prompt = "请生成3道中级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            case 'advanced':
+              prompt = "请生成3道高级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              break;
+            default:
+              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+          }
+
           const response = await sendMessageToCoze({
-            input:
-              "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组",
+            input: prompt,
             userId: userId,
           });
 
@@ -85,8 +201,8 @@ const Quiz: React.FC = () => {
 
             if (questions.length > 0) {
               setQuestions(questions);
-              // 缓存到localStorage
-              localStorage.setItem("quizQuestions", JSON.stringify(questions));
+              // 缓存到localStorage，包含难度信息
+              localStorage.setItem(`quizQuestions_${difficulty}`, JSON.stringify(questions));
             } else {
               // 如果未能提取到题目数据，使用默认题目
               setQuestions(getDefaultQuestions());
@@ -99,7 +215,7 @@ const Quiz: React.FC = () => {
           // 模拟加载时间，给loading动画一些展示时间
           setTimeout(() => {
             setLoading(false);
-          }, 2000);
+          }, 1000);
         }
       } catch (error) {
         console.error("获取题目失败", error);
@@ -109,7 +225,7 @@ const Quiz: React.FC = () => {
     };
 
     fetchQuizQuestions();
-  }, []);
+  }, [difficulty]);
 
   const getDefaultQuestions = (): QuizQuestion[] => {
     return [
@@ -149,6 +265,10 @@ const Quiz: React.FC = () => {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setQuizCompleted(true);
+      // 检查是否所有题目都回答正确，尝试发放SBT
+      if (score === questions.length && currentAccount) {
+        mintAchievementSBT();
+      }
     }
   };
 
@@ -184,6 +304,9 @@ const Quiz: React.FC = () => {
               {
                 onSuccess: (result) => {
                   console.log("奖励积分成功!", result);
+                  setTimeout(() => {
+                    refreshTokenBalance();
+                  }, 1000);
                 },
                 onError: (error) => {
                   console.error("奖励积分失败:", error);
@@ -210,15 +333,80 @@ const Quiz: React.FC = () => {
       });
 
       if (result.status === "success") {
-        // 设置答案结果
-        setAnswerResult({
-          isCorrect: selectedOption !== null && 
-                     isCorrectOption(result.data.answer, selectedOption, result.data.correctOptionLetter),
-          correctAnswer: result.data.answer,
-          correctOptionLetter: result.data.correctOptionLetter,
-          explanation: result.data.explanation
-        });
-        setShowAnswer(true);
+        // 如果用户已登录且有代币，调用合约查看解析
+        if (currentAccount && userCoinId) {
+          try {
+            // 使用新的简化方法，设置销毁的代币数量
+            // const amount = 100000000; // 1 POINT (考虑小数位数)
+            const amount = 50000000;
+
+            // 创建交易，使用简化的方法
+            const transaction = createViewSolutionSimpleTransaction(
+              TESTNET_QUIZMANAGER_ID,
+              userCoinId,
+              amount
+            );
+
+            // 执行交易
+            signAndExecuteTransaction(
+              { transaction },
+              {
+                onSuccess: () => {
+                  // 刷新代币余额
+                  setTimeout(() => {
+                    refreshTokenBalance();
+                  }, 1000);
+
+                  // 设置答案结果
+                  setAnswerResult({
+                    isCorrect:
+                      selectedOption !== null &&
+                      isCorrectOption(
+                        result.data.answer,
+                        selectedOption,
+                        result.data.correctOptionLetter
+                      ),
+                    correctAnswer: result.data.answer,
+                    correctOptionLetter: result.data.correctOptionLetter,
+                    explanation: result.data.explanation,
+                  });
+                  setShowAnswer(true);
+                },
+                onError: (error) => {
+                  console.error("查看解析失败:", error);
+                },
+              }
+            );
+          } catch (error) {
+            alert("缺少积分代币");
+            console.error("调用合约查看解析失败:", error);
+          }
+        } else if (currentAccount) {
+          alert("暂无积分代币");
+          // 如果用户已登录但没有代币，使用直接奖励方法
+          // try {
+          //   // 创建直接奖励交易
+          //   signAndExecuteTransaction(
+          //     createDirectRewardParams(
+          //       TESTNET_QUIZMANAGER_ID,
+          //       currentAccount.address,
+          //       1000000 // 奖励1个代币
+          //     ),
+          //     {
+          //       onSuccess: (result) => {
+          //         console.log("查看解析成功(使用直接奖励)!", result);
+          //         // 刷新代币余额
+          //         refreshTokenBalance();
+          //       },
+          //       onError: (error) => {
+          //         console.error("查看解析失败:", error);
+          //       },
+          //     }
+          //   );
+          // } catch (error) {
+          //   console.error("调用合约查看解析失败:", error);
+          // }
+        }
       }
     } catch (error) {
       console.error("获取答案解析失败", error);
@@ -232,13 +420,109 @@ const Quiz: React.FC = () => {
     setQuizCompleted(false);
     setShowAnswer(false);
     setAnswerResult(null);
+    setSbtAwarded(false);
+  };
+
+  // 添加简化问题到链上的示例函数
+  const handleAddSimpleQuestion = async () => {
+    if (!currentAccount) {
+      console.error("用户未登录");
+      return;
+    }
+
+    try {
+      // 这里应该获取问题注册表ID
+      const registryId = TESTNET_REGISTRY_ID; // 使用测试网络的注册表ID
+
+      // 创建一个问题示例
+      const question = {
+        content:
+          "Move语言中，以下哪个关键字用于声明模块？\nA. struct\nB. resource\nC. module\nD. function",
+      };
+
+      // 使用签名执行交易的mutate方法来添加问题
+      signAndExecuteTransaction(
+        createAddSimpleQuestionParams(registryId, question.content),
+        {
+          onSuccess: (result) => {
+            console.log("简化问题添加成功!", result);
+            // 这里可以解析返回的结果获取问题ID
+            // 前端自己存储选项和正确答案，不上传到链上
+          },
+          onError: (error) => {
+            console.error("简化问题添加失败:", error);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("添加简化问题失败:", error);
+    }
+  };
+
+  // 铸造成就SBT奖励
+  const mintAchievementSBT = async () => {
+    if (!currentAccount || sbtAwarded) return;
+
+    try {
+      // 根据难度级别设置不同的SBT信息
+      let sbtName, sbtDescription, sbtUrl;
+      
+      switch(difficulty) {
+        case 'primary':
+          sbtName = "LearnChain-X 初级答题达人";
+          sbtDescription = "恭喜完成LearnChain-X初级难度的所有问题并答对全部题目，获得初级答题达人成就！";
+          sbtUrl = primaryBadge; // 使用导入的初级徽章图片
+          break;
+        case 'intermediate':
+          sbtName = "LearnChain-X 中级答题达人";
+          sbtDescription = "恭喜完成LearnChain-X中级难度的所有问题并答对全部题目，获得中级答题达人成就！";
+          sbtUrl = intermediateBadge; // 使用导入的中级徽章图片
+          break;
+        case 'advanced':
+          sbtName = "LearnChain-X 高级答题达人";
+          sbtDescription = "恭喜完成LearnChain-X高级难度的所有问题并答对全部题目，获得高级答题达人成就！这证明了您在Move语言方面的专业知识！";
+          sbtUrl = advancedBadge; // 使用导入的高级徽章图片
+          break;
+        default:
+          sbtName = "LearnChain-X 答题达人";
+          sbtDescription = "恭喜完成LearnChain-X所有问题并答对全部题目，赢得此成就徽章！";
+          sbtUrl = primaryBadge; // 默认使用初级徽章图片
+      }
+      
+      // 创建并执行自助铸造SBT的交易
+      signAndExecuteTransaction(
+        createSelfMintSBTParams(
+          sbtName,
+          sbtDescription,
+          sbtUrl,
+          score, // 当前得分
+          questions.length // 总题目数
+        ),
+        {
+          onSuccess: (result) => {
+            console.log("SBT铸造成功!", result);
+            setSbtAwarded(true);
+            alert(`恭喜您获得「${difficulty === 'primary' ? '初级' : difficulty === 'intermediate' ? '中级' : '高级'}答题达人」成就徽章！`);
+          },
+          onError: (error) => {
+            console.error("SBT铸造失败:", error);
+            alert("SBT铸造失败: " + error.message);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("创建SBT交易失败:", error);
+    }
   };
 
   if (loading) {
     return (
       <div className="quiz-loading">
         <div className="loading-spinner"></div>
-        <h2 className="loading-text">一大波题库正在来临...</h2>
+        <h2 className="loading-text">一大波{
+          difficulty === 'primary' ? '初级' : 
+          difficulty === 'intermediate' ? '中级' : 
+          difficulty === 'advanced' ? '高级' : ''}题库正在来临...</h2>
       </div>
     );
   }
@@ -250,9 +534,26 @@ const Quiz: React.FC = () => {
         <p>
           您的分数: {score} / {questions.length}
         </p>
+        {score === questions.length && (
+          <div className="achievement-section">
+            <h3>🏆 恭喜您答对所有题目！</h3>
+            {sbtAwarded ? (
+              <p className="achievement-text">已获得「{difficulty === 'primary' ? '初级' : difficulty === 'intermediate' ? '中级' : '高级'}答题达人」灵魂绑定代币成就徽章！</p>
+            ) : currentAccount ? (
+              <Button 
+                onClick={mintAchievementSBT} 
+                className="mint-sbt-button"
+              >
+                领取SBT成就徽章
+              </Button>
+            ) : (
+              <p className="achievement-text">请连接钱包以领取SBT成就徽章</p>
+            )}
+          </div>
+        )}
         <div className="quiz-actions">
           <button onClick={resetQuiz}>重新开始</button>
-          <Link to="/" className="home-link">
+          <Link to="/dashboard" className="home-link">
             返回首页
           </Link>
         </div>
@@ -274,6 +575,24 @@ const Quiz: React.FC = () => {
 
   return (
     <div className="quiz-container">
+      {/* 显示用户代币余额 */}
+      {currentAccount && (
+        <div
+          className="token-balance"
+        >
+          <p>
+            积分余额: <strong>{userTokenBalance}</strong> POINT
+          </p>
+          <Button
+            onClick={refreshTokenBalance}
+            className="reflesh-button"
+            size="sm"
+          >
+            刷新
+          </Button>
+        </div>
+      )}
+
       <div className="quiz-progress">
         <div
           className="progress-bar"
@@ -302,7 +621,11 @@ const Quiz: React.FC = () => {
                           ${
                             showAnswer &&
                             answerResult &&
-                            isCorrectOption(answerResult.correctAnswer, index, answerResult.correctOptionLetter)
+                            isCorrectOption(
+                              answerResult.correctAnswer,
+                              index,
+                              answerResult.correctOptionLetter
+                            )
                               ? "correct"
                               : ""
                           } 
@@ -328,7 +651,9 @@ const Quiz: React.FC = () => {
           <div className="answer-explanation">
             <p>{answerResult.isCorrect ? "✓ 回答正确!" : "✗ 回答错误!"}</p>
             {answerResult.correctOptionLetter && (
-              <p className="correct-answer">正确答案：{answerResult.correctOptionLetter}</p>
+              <p className="correct-answer">
+                正确答案：{answerResult.correctOptionLetter}
+              </p>
             )}
             {answerResult.explanation && (
               <p className="explanation-text">{answerResult.explanation}</p>
@@ -350,6 +675,22 @@ const Quiz: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 添加问题按钮，仅在开发环境显示 */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="admin-buttons"
+          style={{ marginTop: "20px", display: "none", gap: "10px" }}
+        >
+          <Button
+            onClick={handleAddSimpleQuestion}
+            className="admin-button"
+            style={{ background: "#2196F3" }}
+          >
+            添加简化问题（不含答案和解析）
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -365,7 +706,7 @@ const isCorrectOption = (
     const letterIndex = correctOptionLetter.charCodeAt(0) - 65; // 'A'的ASCII码是65
     return optionIndex === letterIndex;
   }
-  
+
   // 以下是原有逻辑，作为备选判断方式
   if (typeof correctAnswer === "number") {
     return optionIndex === correctAnswer;

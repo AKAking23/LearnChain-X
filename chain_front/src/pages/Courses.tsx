@@ -52,7 +52,7 @@ const Courses: React.FC = () => {
       </div>
       
       <div className="back-link">
-        <Link to="/">返回首页</Link>
+        <Link to="/dashboard">返回</Link>
       </div>
     </div>
   );

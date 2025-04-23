@@ -904,5 +904,23 @@
 		"en": "Correct answer:",
 		"ko": "정답:",
 		"ja": "正解："
+	},
+	"6owdzmm": {
+		"zh-cn": "Move语言中，以下哪个关键字用于声明模块？",
+		"en": "Which of the following keywords is used to declare modules in Move language?",
+		"ko": "Move 언어에서 다음 중 모듈을 선언하는 데 사용되는 키워드는 무엇입니까?",
+		"ja": "Move言語でモジュールを宣言するために使用されるキーワードはどれですか。"
+	},
+	"aql7y16": {
+		"zh-cn": "在Move语言中，'module'关键字用于声明一个新模块，它是代码组织的基本单位。",
+		"en": "In the Move language, ' The 'module' keyword is used to declare a new module, which is the basic unit of code organization.",
+		"ko": "Move 언어에서'module'키워드는 코드 조직의 기본 단위인 새 모듈을 선언하는 데 사용됩니다.",
+		"ja": "Move言語では、'module'キーワードは、コード組織の基本単位である新しいモジュールを宣言するために使用されます。"
+	},
+	"qbx2ys9": {
+		"zh-cn": "添加示例问题到链上",
+		"en": "Add example questions to the chain",
+		"ko": "체인에 예제 질문 추가",
+		"ja": "チェーンへのサンプル問題の追加"
 	}
 }

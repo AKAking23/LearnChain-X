@@ -238,6 +238,28 @@ router.post("/api/verify-answer", async (ctx: Context) => {
       }
     }
     
+    // 对所有ABCD字母答案进行通用处理
+    if (typeof correctAnswer === 'string') {
+      // 直接处理单个字母答案 (A, B, C, D)
+      if (/^[A-D]$/.test(correctAnswer)) {
+        const letterIndex = correctAnswer.charCodeAt(0) - 65; // 'A'的ASCII码是65
+        isCorrect = selectedOption === letterIndex;
+        correctOptionLetter = correctAnswer;
+      }
+      // 处理带点格式 (A., B., C., D.)
+      else if (/^[A-D]\.$/.test(correctAnswer)) {
+        const letterIndex = correctAnswer.charCodeAt(0) - 65;
+        isCorrect = selectedOption === letterIndex;
+        correctOptionLetter = correctAnswer.charAt(0);
+      }
+      // 处理带空格格式 (A xxx, B xxx, C xxx, D xxx)
+      else if (/^[A-D] /.test(correctAnswer)) {
+        const letterIndex = correctAnswer.charCodeAt(0) - 65;
+        isCorrect = selectedOption === letterIndex;
+        correctOptionLetter = correctAnswer.charAt(0);
+      }
+    }
+    
     ctx.status = 200;
     ctx.body = {
       status: "success",

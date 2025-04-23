@@ -203,6 +203,7 @@
 /* 答案解析样式 */
 .answer-explanation {
   margin-top: 20px;
+  margin-bottom: 20px;
   padding: 15px;
   border-radius: 8px;
   background-color: #f8f9fa;
@@ -220,7 +221,7 @@
   margin-bottom: 10px;
 }
 
-.explanation-text{
+.explanation-text {
   margin: 20px 0;
   color: #666;
 }
@@ -244,7 +245,11 @@
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -261,18 +266,87 @@
     padding: 1.5rem;
     margin: 1rem;
   }
-  
+
   .quiz-option {
     padding: 0.75rem;
   }
-  
+
   .loading-spinner {
     width: 60px;
     height: 60px;
     border-width: 6px;
   }
-  
+
   .loading-text {
     font-size: 1.5rem;
   }
-} 
+}
+.token-balance {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  justify-content: end;
+}
+.reflesh-button {
+  background: #000;
+  color: #fff;
+  margin-left: 10px;
+  font-size: 12px;
+}
+
+/* 成就部分样式 */
+.achievement-section {
+  background: linear-gradient(to right, #f6f7f9, #e9f7fe);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e7ff;
+  animation: glow 2s infinite alternate;
+}
+
+.achievement-section h3 {
+  color: #3a539b;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+
+.achievement-text {
+  color: #4a6fa5;
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.mint-sbt-button {
+  background: linear-gradient(135deg, #3498db, #1d6fa5);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 15px auto;
+  display: inline-block;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.mint-sbt-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 15px rgba(52, 152, 219, 0.4);
+  background: linear-gradient(135deg, #2980b9, #164866);
+}
+
+.mint-sbt-button:active {
+  transform: translateY(1px);
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(66, 139, 202, 0.2);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(66, 139, 202, 0.5);
+  }
+}

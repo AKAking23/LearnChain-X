@@ -315,6 +315,7 @@ public entry fun answer_question(
  * 查看问题解析（需要花费积分）
  * 用户使用积分购买解析的查看权限
  * @param registry - 问题注册表
+ * @param manager - Quiz管理器
  * @param user_record - 用户的答题记录
  * @param payment - 用户的积分代币
  * @param question_id - 问题ID
@@ -322,6 +323,7 @@ public entry fun answer_question(
  */
 public entry fun view_solution(
     registry: &QuestionRegistry,
+    manager: &mut QuizManager,
     user_record: &mut UserAnswerRecord,
     payment: &mut Coin<POINT_TOKEN>,
     question_id: u64,
@@ -341,18 +343,17 @@ public entry fun view_solution(
 
     // 如果是第一次查看，需要支付积分
     if (!table::contains(&user_record.viewed_solutions, question_id)) {
-        // 从代币中扣除费用
+        // 从代币中分割出需要销毁的数量
         let burn_amount = coin::split(payment, question.solution_cost, ctx);
-        let burn_balance = coin::into_balance(burn_amount);
+
+        // 销毁代币
+        point_token::burn_tokens(manager, burn_amount);
 
         // 记录已查看标记，后续可免费查看
         table::add(&mut user_record.viewed_solutions, question_id, true);
 
         // 触发解析查看事件
         emit_solution_viewed(user_record.user, question_id, question.solution_cost);
-
-        // 销毁扣除的积分代币
-        sui::balance::destroy_zero(burn_balance);
     }
     // 如果已经查看过，不需要再次支付
 }
@@ -531,4 +532,115 @@ public fun is_answer_correct(user_record: &UserAnswerRecord, question_id: u64): 
 */
 public fun has_viewed_solution(user_record: &UserAnswerRecord, question_id: u64): bool {
     table::contains(&user_record.viewed_solutions, question_id)
+}
+
+/**
+ * 添加新问题（不包含答案和解析）
+ * 只上传问题内容和选项，不上传答案和解析，适用于前端验证答案的场景
+ * @param registry - 问题注册表
+ * @param content - 问题内容
+ * @param options - 问题选项
+ * @param ctx - 交易上下文
+ * @return 新问题的ID
+ */
+public entry fun add_question_without_solution(
+    registry: &mut QuestionRegistry,
+    content: String,
+    options: vector<String>,
+    ctx: &mut TxContext,
+): u64 {
+    // 创建问题对象，使用占位符值
+    let question = Question {
+        id: object::new(ctx),
+        content,
+        options,
+        correct_answer: 0, // 占位符，不存储真实答案
+        points_reward: 0,  // 不设置奖励
+        solution_cost: 0,  // 不设置解析费用
+        solution: string::utf8(b""), // 空解析
+    };
+
+    // 获取并保存问题ID
+    let question_id = registry.next_question_id;
+
+    // 添加到问题列表
+    table::add(&mut registry.questions, question_id, question);
+
+    // 更新下一个问题ID（自增）
+    registry.next_question_id = question_id + 1;
+
+    // 发出问题创建事件
+    emit_question_created(question_id, content, 0);
+    
+    // 返回问题ID
+    question_id
+}
+
+/**
+ * 添加简化问题（只有内容，没有选项、答案和解析）
+ * 适用于前端处理选项和验证答案的场景
+ * @param registry - 问题注册表
+ * @param content - 问题内容
+ * @param ctx - 交易上下文
+ * @return 新问题的ID
+ */
+public entry fun add_simple_question(
+    registry: &mut QuestionRegistry,
+    content: String,
+    ctx: &mut TxContext,
+): u64 {
+    // 创建问题对象，使用空选项和占位符值
+    let empty_options = vector::empty<String>();
+    
+    let question = Question {
+        id: object::new(ctx),
+        content,
+        options: empty_options,
+        correct_answer: 0, // 占位符，不存储真实答案
+        points_reward: 0,  // 不设置奖励
+        solution_cost: 0,  // 不设置解析费用
+        solution: string::utf8(b""), // 空解析
+    };
+
+    // 获取并保存问题ID
+    let question_id = registry.next_question_id;
+
+    // 添加到问题列表
+    table::add(&mut registry.questions, question_id, question);
+
+    // 更新下一个问题ID（自增）
+    registry.next_question_id = question_id + 1;
+
+    // 发出问题创建事件
+    emit_question_created(question_id, content, 0);
+    
+    // 返回问题ID
+    question_id
+}
+
+/**
+ * 简化版查看解析（不需要问题ID）
+ * 用户直接支付一定数量的积分，不关联特定问题
+ * @param manager - Quiz管理器
+ * @param payment - 用户的积分代币
+ * @param amount - 要销毁的积分数量
+ * @param ctx - 交易上下文
+ */
+public entry fun view_solution_simple(
+    manager: &mut QuizManager,
+    payment: &mut Coin<POINT_TOKEN>,
+    amount: u64,
+    ctx: &mut TxContext,
+) {
+    // 检查用户积分是否足够
+    assert!(coin::value(payment) >= amount, EInsufficientBalance);
+
+    // 从代币中分割出需要销毁的数量
+    let burn_amount = coin::split(payment, amount, ctx);
+
+    // 销毁代币
+    point_token::burn_tokens(manager, burn_amount);
+
+    // 触发解析查看事件，使用0作为占位符问题ID
+    emit_solution_viewed(tx_context::sender(ctx), 0, amount);
 }

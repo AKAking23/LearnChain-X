@@ -73,8 +73,8 @@
 
 .welcome_middle_info {
   position: absolute;
-  left: 0;
-  bottom: 0;
+  bottom: 30px;
+  left: 30px;
   width: 40%;
   /* color: var(--color_back); */
   color: var(--color_white);
@@ -157,6 +157,8 @@
   height: calc(var(--scale) * 50rem);
   transform: rotate(var(--before_rotate));
   pointer-events: none;
+  /* 样式偏上 */
+  bottom: 200px;
 }
 
 .welcome_nav_show {
@@ -178,7 +180,8 @@
 
 .welcome_nav_selection {
   position: absolute;
-  width: 100%;
+  /* width: 100%; */
+  width: 70%;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -208,7 +211,7 @@
   height: calc(var(--scale) * 1rem);
   background-color: var(--color_front);
   border-radius: 100%;
-  margin-right: calc(var(--scale) * 1rem);
+  margin-right: calc(var(--scale) * 1.5rem);
 }
 
 .wns_node div::after {
@@ -257,7 +260,7 @@
 }
 
 ._font_2 {
-  font-size: calc(var(--scale) * 2rem);
+  font-size: calc(var(--scale) * 2.2rem);
   font-family: title !important;
 }
 
