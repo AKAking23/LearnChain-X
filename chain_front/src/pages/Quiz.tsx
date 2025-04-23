@@ -25,9 +25,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 // 导入徽章图片
-import primaryBadge from "../assets/images/primary.png";
-import intermediateBadge from "../assets/images/intermediate.png";
-import advancedBadge from "../assets/images/advanced.png";
+import primaryBadge from "https://learnchainx.netlify.app/primary.png";
+import intermediateBadge from "https://learnchainx.netlify.app/intermediate.png";
+import advancedBadge from "https://learnchainx.netlify.app/advanced.png";
 
 interface QuizQuestion {
   id?: number;
