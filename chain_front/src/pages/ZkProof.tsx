@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 // import { useWallet } from "@suiet/wallet-kit";
 import {
   useCurrentAccount,
@@ -26,14 +26,14 @@ const styles = {
     backdropFilter: "blur(10px)",
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
     color: "#fff",
-    position: "relative",
+    position: "relative" as const,
     zIndex: 999,
   },
   title: {
     fontSize: "2rem",
     marginBottom: "1.5rem",
     color: "#fff",
-    textAlign: "center",
+    textAlign: "center" as const,
   },
   section: {
     marginBottom: "2rem",
@@ -93,7 +93,7 @@ const styles = {
     backgroundColor: "rgba(0, 0, 0, 0.3)",
     padding: "1rem",
     borderRadius: "6px",
-    overflowX: "auto",
+    overflowX: "auto" as const,
     maxHeight: "200px",
     fontSize: "0.8rem",
   },
