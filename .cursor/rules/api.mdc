@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 当上下文中提到使用api或者新增、修改删除api的时候，遵循以下规则
+
+1. 首先请梳理总结以下内容
+# {{接口名称}}
+## 接口描述  
+{{简要描述接口功能，例如：获取用户信息、提交订单等}}  
+## 接口地址  
+{{请求方法}} {{URL}}
+## 请求参数  
+| 参数名 | 类型 | 是否必填 | 说明 |  
+|--------|------|----------|-----|  
+{{#参数列表}}  
+| `{{参数名}}` | `{{类型}}` | `{{是/否}}` | {{说明}} |  
+{{/参数列表}}  
+
+2. 在http.ts中封装或修改请求函数实例
+```typescript  
+2.1 首先返回请求与响应数据结构
+interface ResponseData {  
+  {{字段名}}: {{类型}}; // 示例: id: number;  
+  // ...其他字段  
+}  
+
+2.2 在http.ts中封装或修改请求函数实例
+// 1. 创建请求实例  
+const {{请求变量名}} = axios.{{请求方法}}("{{URL}}", {  
+  params: { {{参数名}}: {{值}} }, // GET 参数  
+  data: { {{参数名}}: {{值}} },   // POST/PUT 参数  
+}); 
+/**
+ * {{方法说明}}
+ * @param params 请求参数
+ * @returns Promise<ResponseData>
+ */
+export function {{请求变量名}}(params: ParamseData): Promise<ResponseData> {
+  return service({
+    url: {{请求地址}},
+    method: {{请求方法}},
+    data: {{参数}}
+  });
+}
+
+ 3. 使用示例
+  import http from './http'
+  import { toAwait } from './toAwait'
+  const fetchData = async () => {
+    const [data, error] = await toAwait(http.get('/api/data'))
+    if (error) {
+      // 处理错误
+      console.error('请求失败:', error)
+      return
+    }
+    // 使用数据
+    console.log('请求成功:', data)
+  }
+
+

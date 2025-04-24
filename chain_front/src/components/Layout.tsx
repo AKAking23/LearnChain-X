@@ -7,7 +7,7 @@ import logoImage from "@/assets/images/logo.png";
 const InnerLayout: React.FC = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/" || location.pathname === "";
-  
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -18,7 +18,9 @@ const InnerLayout: React.FC = () => {
           </Link>
         </div>
         <nav className="main-nav">
-          {!isHomePage && <div className="lignt-zk-btn">企业、社区认证</div>}
+          <Link to="/zkProof">
+            {!isHomePage && <div className="lignt-zk-btn">企业、社区认证</div>}
+          </Link>
           <ConnectButton style={{ color: "#fff" }} />
         </nav>
       </header>

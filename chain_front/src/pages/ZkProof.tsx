@@ -169,7 +169,8 @@ const ZkProof: React.FC = () => {
     try {
       // 获取验证器对象ID
       const verifierId = await getVerifierId();
-      const circuitName = "ability"; // 电路名称
+      // const circuitName = "ability" + new Date(); // 电路名称  后续可改为企业/社区名称
+      const circuitName = "ability"; // 电路名称  后续可改为企业/社区名称
 
       // 创建并执行交易
       const txParams = createVerifyZkProofParams(
@@ -262,6 +263,13 @@ const ZkProof: React.FC = () => {
         >
           {showAdminPanel ? "隐藏管理员面板" : "显示管理员面板"}
         </button>
+        {/* <button
+          style={styles.button}
+          onClick={handleAddVerificationKey}
+          disabled={isAddingKey}
+        >
+          {isAddingKey ? <Loader2 className="animate-spin" /> : "添加验证密钥"}
+        </button> */}
       </div>
 
       {/* 管理员面板 */}
@@ -286,12 +294,10 @@ const ZkProof: React.FC = () => {
           </div>
         </div>
       )}
-
       <div style={styles.section}>
-        <h2 style={styles.sectionTitle}>什么是零知识证明？</h2>
+        {/* <h2 style={styles.sectionTitle}>什么是零知识证明？</h2> */}
         <p style={styles.description}>
-          零知识证明允许你向他人证明你满足某些条件，而不泄露任何额外信息。
-          在这个应用中，你可以向企业证明你拥有特定等级的能力凭证，而不必透露你的实际SBT内容或精确分数。
+          向企业证明你拥有特定等级的能力凭证，而不必透露你的实际SBT内容或精确分数。
         </p>
       </div>
 
