@@ -1,10 +1,13 @@
 import React from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { ConnectButton } from "@mysten/dapp-kit";
 import BackgroundBall from "@/components/BackgroundBall";
 import logoImage from "@/assets/images/logo.png";
 // 将Layout组件拆分为外层和内层组件
 const InnerLayout: React.FC = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/" || location.pathname === "";
+  
   return (
     <div className="app-container">
       <header className="app-header">
@@ -15,6 +18,7 @@ const InnerLayout: React.FC = () => {
           </Link>
         </div>
         <nav className="main-nav">
+          {!isHomePage && <div className="lignt-zk-btn">企业、社区认证</div>}
           <ConnectButton style={{ color: "#fff" }} />
         </nav>
       </header>

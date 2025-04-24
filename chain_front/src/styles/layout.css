@@ -33,11 +33,11 @@
   margin: 0;
   padding: 0;
 }
-.main-nav button{
+.main-nav button {
   background: linear-gradient(90deg, #4361ee, #3a0ca3, #e98bb5);
   color: #fff !important;
 }
-.main-nav div{
+.main-nav div {
   color: #fff !important;
 }
 
@@ -230,3 +230,64 @@ h1 {
     font-size: 1rem;
   }
 }
+.lignt-zk-btn {
+  position: relative;
+  display: inline-block;
+  /* width: 220px;
+  height: 80px; */
+  padding: 14px 22px;
+  color: rgb(255, 255, 255);
+  font-size: 1rem;
+  margin-right: 10px;
+  font-family: sans-serif;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    rgb(226, 20, 233),
+    rgb(39, 122, 218),
+    rgb(74, 230, 121),
+    rgb(201, 214, 13),
+    rgb(16, 172, 219)
+  );
+  background-size: 400%;
+  z-index: 1;
+  text-shadow: 0 0 5px white, 0 0 2px white;
+}
+.lignt-zk-btn:hover {
+  animation: ligntMove 5s linear alternate infinite;
+}
+
+@keyframes ligntMove {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 100%;
+  }
+}
+.lignt-zk-btn::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  /* width: 240px;
+  height: 100px; */
+  padding: 16px 24px;
+  background: linear-gradient(
+    90deg,
+    rgb(226, 20, 233),
+    rgb(39, 122, 218),
+    rgb(74, 230, 121),
+    rgb(243, 169, 10),
+    rgb(16, 172, 219)
+  );
+  background-size: 400%;
+  opacity: 0;
+  z-index: -1;
+  border-radius: 45px;
+  transition: 0.6s;
+}
+
