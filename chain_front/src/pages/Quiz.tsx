@@ -20,10 +20,10 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { Button } from "@/components/ui/button";
-// 导入徽章图片
-// import primaryBadge from "https://learnchainx.netlify.app/primary.png";
-// import intermediateBadge from "https://learnchainx.netlify.app/intermediate.png";
-// import advancedBadge from "https://learnchainx.netlify.app/advanced.png";
+import {
+  encryptAndUploadToWalrus,
+  createPublishBlobTransaction,
+} from "@/api/walrus";
 
 interface QuizQuestion {
   id?: number;
@@ -49,6 +49,10 @@ const Quiz: React.FC = () => {
     explanation?: string;
   } | null>(null);
   const [sbtAwarded, setSbtAwarded] = useState<boolean>(false);
+  const [encryptingQuestions, setEncryptingQuestions] =
+    useState<boolean>(false);
+  const [questionsEncrypted, setQuestionsEncrypted] = useState<boolean>(false);
+  const [walrusBlobId, setWalrusBlobId] = useState<string>("");
 
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
@@ -149,8 +153,20 @@ const Quiz: React.FC = () => {
         localStorage.setItem("userId", userId);
 
         if (cachedQuestions) {
-          setQuestions(JSON.parse(cachedQuestions));
+          const parsedQuestions = JSON.parse(cachedQuestions);
+          setQuestions(parsedQuestions);
           setLoading(false);
+
+          // 加载缓存题目后，自动加密并上传到Walrus
+          if (
+            currentAccount &&
+            parsedQuestions.length > 0 &&
+            !questionsEncrypted
+          ) {
+            setTimeout(() => {
+              encryptQuestionsToWalrus();
+            }, 1000);
+          }
         } else {
           // 如果没有缓存，则调用API获取题目
           // 根据难度级别调整提示词
@@ -207,13 +223,36 @@ const Quiz: React.FC = () => {
                 `quizQuestions_${difficulty}`,
                 JSON.stringify(questions)
               );
+
+              // 加载新题目后，如果用户已登录，自动加密并上传到Walrus
+              if (currentAccount) {
+                setTimeout(() => {
+                  encryptQuestionsToWalrus();
+                }, 1000);
+              }
             } else {
               // 如果未能提取到题目数据，使用默认题目
-              setQuestions(getDefaultQuestions());
+              const defaultQuestions = getDefaultQuestions();
+              setQuestions(defaultQuestions);
+
+              // 如果用户已登录，自动加密并上传默认题目到Walrus
+              if (currentAccount) {
+                setTimeout(() => {
+                  encryptQuestionsToWalrus();
+                }, 1000);
+              }
             }
           } else {
             // 如果返回数据格式不正确，使用默认题目
-            setQuestions(getDefaultQuestions());
+            const defaultQuestions = getDefaultQuestions();
+            setQuestions(defaultQuestions);
+
+            // 如果用户已登录，自动加密并上传默认题目到Walrus
+            if (currentAccount) {
+              setTimeout(() => {
+                encryptQuestionsToWalrus();
+              }, 1000);
+            }
           }
 
           // 模拟加载时间，给loading动画一些展示时间
@@ -223,13 +262,22 @@ const Quiz: React.FC = () => {
         }
       } catch (error) {
         console.error("获取题目失败", error);
-        setQuestions(getDefaultQuestions());
+        const defaultQuestions = getDefaultQuestions();
+        setQuestions(defaultQuestions);
         setLoading(false);
+
+        // 如果用户已登录，加载失败时也尝试加密并上传默认题目到Walrus
+        if (currentAccount) {
+          setTimeout(() => {
+            encryptQuestionsToWalrus();
+          }, 1000);
+        }
       }
     };
 
     fetchQuizQuestions();
-  }, [difficulty]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [difficulty, currentAccount, questionsEncrypted]); // 添加questionsEncrypted作为依赖项
 
   const getDefaultQuestions = (): QuizQuestion[] => {
     return [
@@ -533,6 +581,112 @@ const Quiz: React.FC = () => {
     }
   };
 
+  // 加密并上传题目到Walrus
+  const encryptQuestionsToWalrus = async () => {
+    console.log(questions, "currentQuestion---");
+    if (
+      !currentAccount ||
+      !questions.length ||
+      encryptingQuestions ||
+      questionsEncrypted
+    )
+      return;
+
+    try {
+      setEncryptingQuestions(true);
+
+      // 创建包含题目和答案的数据结构
+      const questionsData = {
+        questions,
+        difficulty,
+        timestamp: Date.now(),
+        creator: currentAccount.address,
+      };
+
+      // 检查是否已经加密过该难度的题目
+      const encryptedKey = `encrypted_${difficulty}_${currentAccount.address}`;
+      const hasEncrypted = localStorage.getItem(encryptedKey);
+
+      if (hasEncrypted) {
+        console.log(`题目已经加密过，使用缓存的blobId: ${hasEncrypted}`);
+        setWalrusBlobId(hasEncrypted);
+        setQuestionsEncrypted(true);
+        setEncryptingQuestions(false);
+        return;
+      }
+
+      // 将题目数据转为JSON并创建Blob
+      const jsonData = JSON.stringify(questionsData);
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const file = new File([blob], `quiz_${difficulty}_${Date.now()}.json`, {
+        type: "application/json",
+      });
+
+      // 使用Walrus API加密并上传
+      const policyObject =
+        "0x7388618d566871ed19c1df83c480464cf71da2da36fceabe91fa3814d3fe4826"; // 示例ID，实际使用时需要传入有效值
+      const result = await encryptAndUploadToWalrus(
+        file,
+        policyObject,
+        suiClient as unknown // 使用类型断言解决SuiClient版本兼容问题
+      );
+
+      // 保存返回的blobId
+      setWalrusBlobId(result.blobId);
+      setQuestionsEncrypted(true);
+
+      // 缓存加密状态到localStorage
+      localStorage.setItem(encryptedKey, result.blobId);
+
+      console.log("题目已加密存储到Walrus:", result);
+
+      // 显示加密成功提示
+      setTimeout(() => {
+        alert(
+          `${difficulty}难度题目已成功加密存储到Walrus！BlobId: ${result.blobId.substring(
+            0,
+            10
+          )}...`
+        );
+      }, 500);
+
+      // // 可选：将blobId关联到SUI对象
+      // const capId =
+      //   "0x4bb927a676df9af934ffb8861f340a4fa1042fb1276d061304e273e71dae62b3"; // 示例ID，实际使用时需要传入有效值
+      // const packageId = "0x1234"; // 替换为实际的包ID
+
+      // try {
+      //   // 使用类型断言解决Transaction版本兼容性问题
+      //   const tx = createPublishBlobTransaction(
+      //     policyObject,
+      //     capId,
+      //     "allowlist",
+      //     result.blobId,
+      //     packageId
+      //   );
+
+      //   signAndExecuteTransaction(
+      //     { transaction: tx as any }, // 使用类型断言解决类型兼容性问题
+      //     {
+      //       onSuccess: (result) => {
+      //         console.log("题目blobId已关联到SUI对象", result);
+      //       },
+      //       onError: (error) => {
+      //         console.error("关联题目blobId失败", error);
+      //       },
+      //     }
+      //   );
+      // } catch (error) {
+      //   console.error("创建关联交易失败", error);
+      // }
+    } catch (error) {
+      console.error("加密题目失败:", error);
+      alert("加密题目失败，请稍后再试");
+    } finally {
+      setEncryptingQuestions(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="quiz-loading">
@@ -629,7 +783,6 @@ const Quiz: React.FC = () => {
           </Button>
         </div>
       )}
-
       <div className="quiz-progress">
         <div
           className="progress-bar"
@@ -713,21 +866,74 @@ const Quiz: React.FC = () => {
         </div>
       </div>
 
-      {/* 添加问题按钮，仅在开发环境显示 */}
-      {process.env.NODE_ENV === "development" && (
+      {walrusBlobId && (
         <div
-          className="admin-buttons"
-          style={{ marginTop: "20px", display: "none", gap: "10px" }}
+          className="blob-info"
+          style={{
+            marginTop: "10px",
+            background: "#f0f8ff",
+            padding: "10px",
+            borderRadius: "4px",
+            width: "100%",
+          }}
         >
-          <Button
-            onClick={handleAddSimpleQuestion}
-            className="admin-button"
-            style={{ background: "#2196F3" }}
-          >
-            添加简化问题（不含答案和解析）
-          </Button>
+          <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+            题目加密信息:
+          </div>
+          <p>BlobId: {walrusBlobId}</p>
+          <p>难度级别: {difficulty}</p>
+          <p>题目数量: {questions.length}</p>
+          <p>状态: {questionsEncrypted ? "✅ 已加密存储" : "❌ 未加密"}</p>
         </div>
       )}
+      {/* 添加问题按钮，仅在开发环境显示 */}
+      {/* {process.env.NODE_ENV === "development" && (
+        <div
+          className="admin-buttons"
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            gap: "10px",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
+          <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+            <Button
+              onClick={handleAddSimpleQuestion}
+              className="admin-button"
+              style={{ background: "#2196F3" }}
+            >
+              添加简化问题（不含答案和解析）
+            </Button>
+
+            <Button
+              onClick={encryptQuestionsToWalrus}
+              className="admin-button"
+              style={{ background: "#9c27b0" }}
+              disabled={
+                encryptingQuestions || !questions.length || questionsEncrypted
+              }
+            >
+              {encryptingQuestions
+                ? "加密中..."
+                : questionsEncrypted
+                ? "已加密存储"
+                : "加密题目到Walrus"}
+            </Button>
+          </div>
+
+          {walrusBlobId && (
+            <div className="blob-info" style={{ marginTop: "10px", background: "#f0f8ff", padding: "10px", borderRadius: "4px", width: "100%" }}>
+              <div style={{ fontWeight: "bold", marginBottom: "5px" }}>题目加密信息:</div>
+              <p>BlobId: {walrusBlobId}</p>
+              <p>难度级别: {difficulty}</p>
+              <p>题目数量: {questions.length}</p>
+              <p>状态: {questionsEncrypted ? "✅ 已加密存储" : "❌ 未加密"}</p>
+            </div>
+          )}
+        </div>
+      )} */}
     </div>
   );
 };
