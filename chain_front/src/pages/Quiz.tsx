@@ -12,18 +12,14 @@ import {
   createSelfMintSBTParams,
   CONTRACT_ADDRESS,
 } from "../api/sui";
-import "../styles/Quiz.css"; // 需要创建这个CSS文件
-import { 
-  TESTNET_QUIZMANAGER_ID, 
-  TESTNET_REGISTRY_ID
-} from "@/utils/constants";
+import "../styles/Quiz.css";
+import { TESTNET_QUIZMANAGER_ID, TESTNET_REGISTRY_ID } from "@/utils/constants";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { Button } from "@/components/ui/button";
-
 // 导入徽章图片
 // import primaryBadge from "https://learnchainx.netlify.app/primary.png";
 // import intermediateBadge from "https://learnchainx.netlify.app/intermediate.png";
@@ -38,8 +34,7 @@ interface QuizQuestion {
 
 const Quiz: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const difficulty = searchParams.get('difficulty') || 'primary';
-  
+  const difficulty = searchParams.get("difficulty") || "primary";
   const [loading, setLoading] = useState<boolean>(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
@@ -144,7 +139,9 @@ const Quiz: React.FC = () => {
       try {
         setLoading(true);
         // 从localStorage检查是否已经缓存了题目
-        const cachedQuestions = localStorage.getItem(`quizQuestions_${difficulty}`);
+        const cachedQuestions = localStorage.getItem(
+          `quizQuestions_${difficulty}`
+        );
         // 生成或获取用户ID
         const userId =
           localStorage.getItem("userId") ||
@@ -158,18 +155,22 @@ const Quiz: React.FC = () => {
           // 如果没有缓存，则调用API获取题目
           // 根据难度级别调整提示词
           let prompt = "";
-          switch(difficulty) {
-            case 'primary':
-              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+          switch (difficulty) {
+            case "primary":
+              prompt =
+                "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
               break;
-            case 'intermediate':
-              prompt = "请生成3道中级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+            case "intermediate":
+              prompt =
+                "请生成3道中级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
               break;
-            case 'advanced':
-              prompt = "请生成3道高级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+            case "advanced":
+              prompt =
+                "请生成3道高级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
               break;
             default:
-              prompt = "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
+              prompt =
+                "请生成3道初级Move语言相关的选择题，每道题有4个选项，格式为JSON数组";
           }
 
           const response = await sendMessageToCoze({
@@ -202,7 +203,10 @@ const Quiz: React.FC = () => {
             if (questions.length > 0) {
               setQuestions(questions);
               // 缓存到localStorage，包含难度信息
-              localStorage.setItem(`quizQuestions_${difficulty}`, JSON.stringify(questions));
+              localStorage.setItem(
+                `quizQuestions_${difficulty}`,
+                JSON.stringify(questions)
+              );
             } else {
               // 如果未能提取到题目数据，使用默认题目
               setQuestions(getDefaultQuestions());
@@ -466,31 +470,35 @@ const Quiz: React.FC = () => {
     try {
       // 根据难度级别设置不同的SBT信息
       let sbtName, sbtDescription, sbtUrl;
-      
-      switch(difficulty) {
-        case 'primary':
+
+      switch (difficulty) {
+        case "primary":
           sbtName = "LearnChain-X 初级答题达人";
-          sbtDescription = "恭喜完成LearnChain-X初级难度的所有问题并答对全部题目，获得初级答题达人成就！";
+          sbtDescription =
+            "恭喜完成LearnChain-X初级难度的所有问题并答对全部题目，获得初级答题达人成就！";
           // sbtUrl = primaryBadge; // 使用导入的初级徽章图片
-          sbtUrl = 'https://learnchainx.netlify.app/primary.png'; // 使用导入的初级徽章图片
-          
+          sbtUrl = "https://learnchainx.netlify.app/primary.png"; // 使用导入的初级徽章图片
+
           break;
-        case 'intermediate':
+        case "intermediate":
           sbtName = "LearnChain-X 中级答题达人";
-          sbtDescription = "恭喜完成LearnChain-X中级难度的所有问题并答对全部题目，获得中级答题达人成就！";
-          sbtUrl = 'https://learnchainx.netlify.app/intermediate.png'; // 使用导入的中级徽章图片
+          sbtDescription =
+            "恭喜完成LearnChain-X中级难度的所有问题并答对全部题目，获得中级答题达人成就！";
+          sbtUrl = "https://learnchainx.netlify.app/intermediate.png"; // 使用导入的中级徽章图片
           break;
-        case 'advanced':
+        case "advanced":
           sbtName = "LearnChain-X 高级答题达人";
-          sbtDescription = "恭喜完成LearnChain-X高级难度的所有问题并答对全部题目，获得高级答题达人成就！这证明了您在Move语言方面的专业知识！";
-          sbtUrl = 'https://learnchainx.netlify.app/advanced.png'; // 使用导入的中级徽章图片
+          sbtDescription =
+            "恭喜完成LearnChain-X高级难度的所有问题并答对全部题目，获得高级答题达人成就！这证明了您在Move语言方面的专业知识！";
+          sbtUrl = "https://learnchainx.netlify.app/advanced.png"; // 使用导入的中级徽章图片
           break;
         default:
           sbtName = "LearnChain-X 答题达人";
-          sbtDescription = "恭喜完成LearnChain-X所有问题并答对全部题目，赢得此成就徽章！";
-          sbtUrl = 'https://learnchainx.netlify.app/primary.png'; // 使用导入的初级徽章图片
+          sbtDescription =
+            "恭喜完成LearnChain-X所有问题并答对全部题目，赢得此成就徽章！";
+          sbtUrl = "https://learnchainx.netlify.app/primary.png"; // 使用导入的初级徽章图片
       }
-      
+
       // 创建并执行自助铸造SBT的交易
       signAndExecuteTransaction(
         createSelfMintSBTParams(
@@ -504,7 +512,15 @@ const Quiz: React.FC = () => {
           onSuccess: (result) => {
             console.log("SBT铸造成功!", result);
             setSbtAwarded(true);
-            alert(`恭喜您获得「${difficulty === 'primary' ? '初级' : difficulty === 'intermediate' ? '中级' : '高级'}答题达人」成就徽章！`);
+            alert(
+              `恭喜您获得「${
+                difficulty === "primary"
+                  ? "初级"
+                  : difficulty === "intermediate"
+                  ? "中级"
+                  : "高级"
+              }答题达人」成就徽章！`
+            );
           },
           onError: (error) => {
             console.error("SBT铸造失败:", error);
@@ -521,10 +537,17 @@ const Quiz: React.FC = () => {
     return (
       <div className="quiz-loading">
         <div className="loading-spinner"></div>
-        <h2 className="loading-text">一大波{
-          difficulty === 'primary' ? '初级' : 
-          difficulty === 'intermediate' ? '中级' : 
-          difficulty === 'advanced' ? '高级' : ''}题库正在来临...</h2>
+        <h2 className="loading-text">
+          一大波
+          {difficulty === "primary"
+            ? "初级"
+            : difficulty === "intermediate"
+            ? "中级"
+            : difficulty === "advanced"
+            ? "高级"
+            : ""}
+          题库正在来临...
+        </h2>
       </div>
     );
   }
@@ -540,12 +563,17 @@ const Quiz: React.FC = () => {
           <div className="achievement-section">
             <h3>🏆 恭喜您答对所有题目！</h3>
             {sbtAwarded ? (
-              <p className="achievement-text">已获得「{difficulty === 'primary' ? '初级' : difficulty === 'intermediate' ? '中级' : '高级'}答题达人」灵魂绑定代币成就徽章！</p>
+              <p className="achievement-text">
+                已获得「
+                {difficulty === "primary"
+                  ? "初级"
+                  : difficulty === "intermediate"
+                  ? "中级"
+                  : "高级"}
+                答题达人」灵魂绑定代币成就徽章！
+              </p>
             ) : currentAccount ? (
-              <Button 
-                onClick={mintAchievementSBT} 
-                className="mint-sbt-button"
-              >
+              <Button onClick={mintAchievementSBT} className="mint-sbt-button">
                 领取SBT成就徽章
               </Button>
             ) : (
@@ -577,11 +605,18 @@ const Quiz: React.FC = () => {
 
   return (
     <div className="quiz-container">
+      {/* <WalrusUpload
+        policyObject={
+          "0x7388618d566871ed19c1df83c480464cf71da2da36fceabe91fa3814d3fe4826"
+        }
+        cap_id={
+          "0x4bb927a676df9af934ffb8861f340a4fa1042fb1276d061304e273e71dae62b3"
+        }
+        moduleName="allowlist"
+      /> */}
       {/* 显示用户代币余额 */}
       {currentAccount && (
-        <div
-          className="token-balance"
-        >
+        <div className="token-balance">
           <p>
             积分余额: <strong>{userTokenBalance}</strong> POINT
           </p>

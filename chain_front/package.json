@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mysten/dapp-kit": "0.15.3",
-    "@mysten/sui": "^1.27.0",
+    "@mysten/dapp-kit": "^0.15.2",
+    "@mysten/seal": "0.3.5",
+    "@mysten/sui": "^1.26.1",
     "@radix-ui/react-slot": "^1.2.0",
     "@suiet/wallet-kit": "^0.3.3",
     "@tailwindcss/vite": "^4.1.3",
