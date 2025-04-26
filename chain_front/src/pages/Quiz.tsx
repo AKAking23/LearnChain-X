@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   sendMessageToCoze,
@@ -20,6 +20,7 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   encryptAndUploadToWalrus,
   createPublishBlobTransaction,
@@ -49,8 +50,7 @@ const Quiz: React.FC = () => {
     explanation?: string;
   } | null>(null);
   const [sbtAwarded, setSbtAwarded] = useState<boolean>(false);
-  const [encryptingQuestions, setEncryptingQuestions] =
-    useState<boolean>(false);
+  const [encryptingQuestions, setEncryptingQuestions] = useState<boolean>(false);
   const [questionsEncrypted, setQuestionsEncrypted] = useState<boolean>(false);
   const [walrusBlobId, setWalrusBlobId] = useState<string>("");
   const [suiWalrusUrl, setSuiWalrusUrl] = useState<string>("");
@@ -61,6 +61,9 @@ const Quiz: React.FC = () => {
   // userCoinId已经不再用于查看解析功能，但仍保留用于获取和显示代币余额
   const [userCoinId, setUserCoinId] = useState<string | null>(null);
   const [userTokenBalance, setUserTokenBalance] = useState<string>("0");
+
+  // 使用useRef创建一个引用，用于跟踪函数是否已被调用
+  const encryptionAttemptedRef = useRef<boolean>(false);
 
   // 获取用户代币ID和余额的函数
   const getUserCoinId = async (address: string) => {
@@ -165,7 +168,8 @@ const Quiz: React.FC = () => {
             !questionsEncrypted
           ) {
             setTimeout(() => {
-              encryptQuestionsToWalrus();
+              // 将parsedQuestions作为参数传递
+              encryptQuestionsToWalrus(parsedQuestions);
             }, 1000);
           }
         } else {
@@ -216,6 +220,7 @@ const Quiz: React.FC = () => {
                 console.error("解析字符串数据失败", e);
               }
             }
+            console.log(questions.length, "questions.length--");
 
             if (questions.length > 0) {
               setQuestions(questions);
@@ -228,7 +233,7 @@ const Quiz: React.FC = () => {
               // 加载新题目后，如果用户已登录，自动加密并上传到Walrus
               if (currentAccount) {
                 setTimeout(() => {
-                  encryptQuestionsToWalrus();
+                  encryptQuestionsToWalrus(questions);
                 }, 1000);
               }
             } else {
@@ -239,7 +244,7 @@ const Quiz: React.FC = () => {
               // 如果用户已登录，自动加密并上传默认题目到Walrus
               if (currentAccount) {
                 setTimeout(() => {
-                  encryptQuestionsToWalrus();
+                  encryptQuestionsToWalrus(defaultQuestions);
                 }, 1000);
               }
             }
@@ -251,7 +256,7 @@ const Quiz: React.FC = () => {
             // 如果用户已登录，自动加密并上传默认题目到Walrus
             if (currentAccount) {
               setTimeout(() => {
-                encryptQuestionsToWalrus();
+                encryptQuestionsToWalrus(defaultQuestions);
               }, 1000);
             }
           }
@@ -270,7 +275,7 @@ const Quiz: React.FC = () => {
         // 如果用户已登录，加载失败时也尝试加密并上传默认题目到Walrus
         if (currentAccount) {
           setTimeout(() => {
-            encryptQuestionsToWalrus();
+            encryptQuestionsToWalrus(defaultQuestions);
           }, 1000);
         }
       }
@@ -278,7 +283,7 @@ const Quiz: React.FC = () => {
 
     fetchQuizQuestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [difficulty, currentAccount, questionsEncrypted]); // 添加questionsEncrypted作为依赖项
+  }, [difficulty, currentAccount]); // 移除 questionsEncrypted 作为依赖项
 
   const getDefaultQuestions = (): QuizQuestion[] => {
     return [
@@ -583,11 +588,21 @@ const Quiz: React.FC = () => {
   };
 
   // 加密并上传题目到Walrus
-  const encryptQuestionsToWalrus = async () => {
-    console.log(questions, "currentQuestion---");
+  const encryptQuestionsToWalrus = async (questionsToEncrypt = questions) => {
+    console.log(questionsToEncrypt, "questionsToEncrypt---");
+    
+    // 如果已经尝试过加密，直接返回
+    if (encryptionAttemptedRef.current) {
+      console.log("已经尝试过加密，不再重复执行");
+      return;
+    }
+    
+    // 标记已尝试加密
+    encryptionAttemptedRef.current = true;
+    
     if (
       !currentAccount ||
-      !questions.length ||
+      !questionsToEncrypt.length ||
       encryptingQuestions ||
       questionsEncrypted
     )
@@ -598,7 +613,7 @@ const Quiz: React.FC = () => {
 
       // 创建包含题目和答案的数据结构
       const questionsData = {
-        questions,
+        questions: questionsToEncrypt,
         difficulty,
         timestamp: Date.now(),
         creator: currentAccount.address,
@@ -648,7 +663,13 @@ const Quiz: React.FC = () => {
 
       // 显示加密成功提示
       setTimeout(() => {
-        alert(
+        // alert(
+        // `${difficulty}难度题目已成功加密存储到Walrus！BlobId: ${result.blobId.substring(
+        //   0,
+        //   10
+        // )}...`;
+        // );
+        console.log(
           `${difficulty}难度题目已成功加密存储到Walrus！BlobId: ${result.blobId.substring(
             0,
             10
@@ -687,6 +708,8 @@ const Quiz: React.FC = () => {
       // }
     } catch (error) {
       console.error("加密题目失败:", error);
+      // 如果发生错误，重置尝试状态，允许再次尝试
+      encryptionAttemptedRef.current = false;
       alert("加密题目失败，请稍后再试");
     } finally {
       setEncryptingQuestions(false);
@@ -797,13 +820,11 @@ const Quiz: React.FC = () => {
           }}
         ></div>
       </div>
-
       <div className="quiz-header">
         <p>
           问题 {currentQuestionIndex + 1} / {questions.length}
         </p>
       </div>
-
       <div className="quiz-question">
         <h3>{currentQuestion.question}</h3>
 
@@ -871,7 +892,12 @@ const Quiz: React.FC = () => {
           )}
         </div>
       </div>
-
+      {!walrusBlobId && (
+        <Button disabled style={{ color: "#000" }}>
+          <Loader2 className="animate-spin" />
+          正在将题目加密存储
+        </Button>
+      )}
       {walrusBlobId && (
         <div
           className="blob-info"
