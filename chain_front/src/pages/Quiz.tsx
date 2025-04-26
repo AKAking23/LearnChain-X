@@ -53,6 +53,7 @@ const Quiz: React.FC = () => {
     useState<boolean>(false);
   const [questionsEncrypted, setQuestionsEncrypted] = useState<boolean>(false);
   const [walrusBlobId, setWalrusBlobId] = useState<string>("");
+  const [suiWalrusUrl, setSuiWalrusUrl] = useState<string>("");
 
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
@@ -607,9 +608,13 @@ const Quiz: React.FC = () => {
       const encryptedKey = `encrypted_${difficulty}_${currentAccount.address}`;
       const hasEncrypted = localStorage.getItem(encryptedKey);
 
+      const encryptedSuiUrl = `encryptedSuiUrl_${difficulty}_${currentAccount.address}`;
+      const hasEncryptedSuiUrl = localStorage.getItem(encryptedSuiUrl);
+
       if (hasEncrypted) {
         console.log(`题目已经加密过，使用缓存的blobId: ${hasEncrypted}`);
         setWalrusBlobId(hasEncrypted);
+        setSuiWalrusUrl(hasEncryptedSuiUrl);
         setQuestionsEncrypted(true);
         setEncryptingQuestions(false);
         return;
@@ -624,19 +629,20 @@ const Quiz: React.FC = () => {
 
       // 使用Walrus API加密并上传
       const policyObject =
-        "0x7388618d566871ed19c1df83c480464cf71da2da36fceabe91fa3814d3fe4826"; // 示例ID，实际使用时需要传入有效值
+        "0x7388618d566871ed19c1df83c480464cf71da2da36fceabe91fa3814d3fe4826";
       const result = await encryptAndUploadToWalrus(
         file,
         policyObject,
         suiClient as unknown // 使用类型断言解决SuiClient版本兼容问题
       );
-
       // 保存返回的blobId
       setWalrusBlobId(result.blobId);
+      setSuiWalrusUrl(result.suiUrl);
       setQuestionsEncrypted(true);
 
       // 缓存加密状态到localStorage
       localStorage.setItem(encryptedKey, result.blobId);
+      localStorage.setItem(encryptedSuiUrl, result.suiUrl);
 
       console.log("题目已加密存储到Walrus:", result);
 
@@ -884,6 +890,15 @@ const Quiz: React.FC = () => {
           <p>难度级别: {difficulty}</p>
           <p>题目数量: {questions.length}</p>
           <p>状态: {questionsEncrypted ? "✅ 已加密存储" : "❌ 未加密"}</p>
+          <a
+            href={suiWalrusUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "underline" }}
+            aria-label="View Sui object details"
+          >
+            Sui Object
+          </a>
         </div>
       )}
       {/* 添加问题按钮，仅在开发环境显示 */}
