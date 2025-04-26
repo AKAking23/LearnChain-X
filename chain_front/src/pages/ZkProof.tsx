@@ -215,7 +215,7 @@ const ZkProof: React.FC = () => {
     try {
       // 获取验证器ID
       const verifierId = await getVerifierId();
-      const circuitName = "ability"; // 电路名称
+      const circuitName = "ability" + new Date().getTime(); // 电路名称
 
       // 获取验证密钥
       const verificationKey = await getVerificationKey();
@@ -249,7 +249,7 @@ const ZkProof: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>零知识能力证明</h1>
+      <h1 style={styles.title}>企业、社区认证</h1>
 
       {/* 管理员面板切换按钮 */}
       <div style={{ textAlign: "right", marginBottom: "1rem" }}>

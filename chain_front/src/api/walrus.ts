@@ -236,20 +236,36 @@ function formatUploadResult(storage_info: StorageInfo, media_type: string): Walr
  */
 export function createPublishBlobTransaction(
   policyObject: string,
-  capId: string,
+  // capId: string,
   moduleName: string,
   blobId: string,
-  packageId: string
+  packageId: string,
+  difficulty?: string
 ): any {
   const tx = new Transaction();
-  tx.moveCall({
-    target: `${packageId}::${moduleName}::publish`,
-    arguments: [
-      tx.object(policyObject),
-      tx.object(capId),
-      tx.pure.string(blobId),
-    ],
-  });
+  
+  // 判断是否提供了difficulty参数
+  if (difficulty) {
+    // 使用publish_with_difficulty函数
+    tx.moveCall({
+      target: `${packageId}::${moduleName}::publish_with_difficulty`,
+      arguments: [
+        tx.object(policyObject),
+        tx.pure.string(blobId),
+        tx.pure.string(difficulty),
+      ],
+    });
+  } else {
+    // 使用基本的publish函数
+    tx.moveCall({
+      target: `${packageId}::${moduleName}::publish`,
+      arguments: [
+        tx.object(policyObject),
+        tx.pure.string(blobId),
+      ],
+    });
+  }
+  
   tx.setGasBudget(10000000);
   return tx;
 } 

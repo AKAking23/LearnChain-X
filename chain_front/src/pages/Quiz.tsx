@@ -13,7 +13,7 @@ import {
   CONTRACT_ADDRESS,
 } from "../api/sui";
 import "../styles/Quiz.css";
-import { TESTNET_QUIZMANAGER_ID, TESTNET_REGISTRY_ID } from "@/utils/constants";
+import { TESTNET_QUIZMANAGER_ID, TESTNET_REGISTRY_ID,TESTNET_COUNTER_PACKAGE_ID } from "@/utils/constants";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
@@ -50,7 +50,8 @@ const Quiz: React.FC = () => {
     explanation?: string;
   } | null>(null);
   const [sbtAwarded, setSbtAwarded] = useState<boolean>(false);
-  const [encryptingQuestions, setEncryptingQuestions] = useState<boolean>(false);
+  const [encryptingQuestions, setEncryptingQuestions] =
+    useState<boolean>(false);
   const [questionsEncrypted, setQuestionsEncrypted] = useState<boolean>(false);
   const [walrusBlobId, setWalrusBlobId] = useState<string>("");
   const [suiWalrusUrl, setSuiWalrusUrl] = useState<string>("");
@@ -590,16 +591,16 @@ const Quiz: React.FC = () => {
   // 加密并上传题目到Walrus
   const encryptQuestionsToWalrus = async (questionsToEncrypt = questions) => {
     console.log(questionsToEncrypt, "questionsToEncrypt---");
-    
+
     // 如果已经尝试过加密，直接返回
     if (encryptionAttemptedRef.current) {
       console.log("已经尝试过加密，不再重复执行");
       return;
     }
-    
+
     // 标记已尝试加密
     encryptionAttemptedRef.current = true;
-    
+
     if (
       !currentAccount ||
       !questionsToEncrypt.length ||
@@ -643,8 +644,7 @@ const Quiz: React.FC = () => {
       });
 
       // 使用Walrus API加密并上传
-      const policyObject =
-        "0x7388618d566871ed19c1df83c480464cf71da2da36fceabe91fa3814d3fe4826";
+      const policyObject = currentAccount.address;
       const result = await encryptAndUploadToWalrus(
         file,
         policyObject,
@@ -682,30 +682,31 @@ const Quiz: React.FC = () => {
       //   "0x4bb927a676df9af934ffb8861f340a4fa1042fb1276d061304e273e71dae62b3"; // 示例ID，实际使用时需要传入有效值
       // const packageId = "0x1234"; // 替换为实际的包ID
 
-      // try {
-      //   // 使用类型断言解决Transaction版本兼容性问题
-      //   const tx = createPublishBlobTransaction(
-      //     policyObject,
-      //     capId,
-      //     "allowlist",
-      //     result.blobId,
-      //     packageId
-      //   );
+      try {
+        // 使用类型断言解决Transaction版本兼容性问题
+        const tx = createPublishBlobTransaction(
+          policyObject,
+          // capId,
+          "seal_quiz_walrus",
+          result.blobId,
+          TESTNET_COUNTER_PACKAGE_ID,
+          difficulty // 传递题目难度级别作为参数
+        );
 
-      //   signAndExecuteTransaction(
-      //     { transaction: tx as any }, // 使用类型断言解决类型兼容性问题
-      //     {
-      //       onSuccess: (result) => {
-      //         console.log("题目blobId已关联到SUI对象", result);
-      //       },
-      //       onError: (error) => {
-      //         console.error("关联题目blobId失败", error);
-      //       },
-      //     }
-      //   );
-      // } catch (error) {
-      //   console.error("创建关联交易失败", error);
-      // }
+        signAndExecuteTransaction(
+          { transaction: tx as any }, // 使用类型断言解决类型兼容性问题
+          {
+            onSuccess: (result) => {
+              console.log("题目blobId已关联到SUI对象", result);
+            },
+            onError: (error) => {
+              console.error("关联题目blobId失败", error);
+            },
+          }
+        );
+      } catch (error) {
+        console.error("创建关联交易失败", error);
+      }
     } catch (error) {
       console.error("加密题目失败:", error);
       // 如果发生错误，重置尝试状态，允许再次尝试
