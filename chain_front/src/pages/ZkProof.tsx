@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-// import { useWallet } from "@suiet/wallet-kit";
+// @ts-nocheck
+import { useState } from "react";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
