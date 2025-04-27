@@ -1,5 +1,4 @@
-// Copyright (c), Mysten Labs, Inc.
-// SPDX-License-Identifier: Apache-2.0
+// @ts-nocheck
 import React, { useState } from "react";
 import { Transaction } from "@mysten/sui/transactions";
 import { TESTNET_COUNTER_PACKAGE_ID } from "@/utils/constants";

@@ -5,7 +5,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { getAllowlistedKeyServers } from "@mysten/seal";
 import { fromHex, toHex } from "@mysten/sui/utils";
 import { TESTNET_COUNTER_PACKAGE_ID } from "@/utils/constants";
-import type { SuiClient } from "@mysten/sui/client";
+// import type { SuiClient } from "@mysten/sui/client";
 
 // 定义数据结构类型
 export type WalrusData = {
