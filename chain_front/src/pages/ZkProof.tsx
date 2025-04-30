@@ -158,9 +158,57 @@ const ZkProof: React.FC = () => {
     VerificationRecord[]
   >([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState<boolean>(false);
+  const [sbtId, setSbtId] = useState<bigint>(BigInt("0")); // 初始化为0
+  const [isLoadingSbt, setIsLoadingSbt] = useState<boolean>(false);
 
-  // 模拟的SBT ID (在实际应用中应从链上查询用户的SBT)
-  const mockSbtId = BigInt("123456789");
+  // 获取用户拥有的SBT
+  const fetchUserSbt = async () => {
+    if (!currentAccount || !suiClient) return;
+    
+    setIsLoadingSbt(true);
+    try {
+      // 查询用户拥有的对象，筛选出SBT类型的对象
+      const ownedObjects = await suiClient.getOwnedObjects({
+        owner: currentAccount.address,
+        filter: {
+          StructType: `${TESTNET_COUNTER_PACKAGE_ID}::sbt::SoulboundToken`
+        },
+        options: {
+          showContent: true,
+          showType: true,
+        }
+      });
+
+      if (ownedObjects.data && ownedObjects.data.length > 0) {
+        // 获取第一个SBT对象的ID
+        const userSbtId = ownedObjects.data[0].data?.objectId;
+        if (userSbtId) {
+          console.log("获取到用户SBT ID:", userSbtId);
+          // 将对象ID转换为BigInt（移除0x前缀并转为十进制BigInt）
+          const sbtIdBigInt = BigInt(parseInt(userSbtId.replace('0x', ''), 16));
+          setSbtId(sbtIdBigInt);
+          return;
+        }
+      }
+      
+      console.log("用户没有SBT，使用模拟ID");
+      // 如果没有找到SBT，使用模拟ID
+      setSbtId(BigInt("123456789"));
+    } catch (error) {
+      console.error("获取用户SBT失败:", error);
+      // 出错时使用模拟ID
+      setSbtId(BigInt("123456789"));
+    } finally {
+      setIsLoadingSbt(false);
+    }
+  };
+
+  // 组件挂载时获取用户SBT
+  useEffect(() => {
+    if (currentAccount) {
+      fetchUserSbt();
+    }
+  }, [currentAccount]);
 
   // 模拟从验证者获取挑战值
   const getChallenge = () => {
@@ -227,7 +275,7 @@ const ZkProof: React.FC = () => {
       const challenge = getChallenge();
       const result = await generateAbilityProof(
         userSbtLevel,
-        mockSbtId,
+        sbtId, // 使用从链上查询到的实际SBT ID
         requiredLevel,
         challenge
       );
@@ -479,41 +527,50 @@ const ZkProof: React.FC = () => {
         </p>
 
         <div style={styles.card}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>
-              你的SBT等级（实际值，仅你自己可见）
-            </label>
-            <select
-              style={styles.select}
-              value={userSbtLevel}
-              onChange={(e) => setUserSbtLevel(Number(e.target.value))}
-            >
-              <option value={1}>初级 SBT</option>
-              <option value={2}>中级 SBT</option>
-              <option value={3}>高级 SBT</option>
-            </select>
-          </div>
+          {isLoadingSbt ? (
+            <div style={{ textAlign: "center", padding: "1rem" }}>
+              <Loader2 className="animate-spin" size={24} />
+              <p style={{ marginTop: "0.5rem" }}>正在加载SBT信息...</p>
+            </div>
+          ) : (
+            <>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  你的SBT等级（实际值，仅你自己可见）
+                </label>
+                <select
+                  style={styles.select}
+                  value={userSbtLevel}
+                  onChange={(e) => setUserSbtLevel(Number(e.target.value))}
+                >
+                  <option value={1}>初级 SBT</option>
+                  <option value={2}>中级 SBT</option>
+                  <option value={3}>高级 SBT</option>
+                </select>
+              </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>需要证明的能力等级（将公开）</label>
-            <select
-              style={styles.select}
-              value={requiredLevel}
-              onChange={(e) => setRequiredLevel(Number(e.target.value))}
-            >
-              <option value={1}>初级</option>
-              <option value={2}>中级</option>
-              <option value={3}>高级</option>
-            </select>
-          </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>需要证明的能力等级（将公开）</label>
+                <select
+                  style={styles.select}
+                  value={requiredLevel}
+                  onChange={(e) => setRequiredLevel(Number(e.target.value))}
+                >
+                  <option value={1}>初级</option>
+                  <option value={2}>中级</option>
+                  <option value={3}>高级</option>
+                </select>
+              </div>
 
-          <button
-            style={styles.button}
-            onClick={handleGenerateProof}
-            disabled={isGenerating || !currentAccount}
-          >
-            {isGenerating ? <Loader2 className="animate-spin" /> : "生成证明"}
-          </button>
+              <button
+                style={styles.button}
+                onClick={handleGenerateProof}
+                disabled={isGenerating || !currentAccount}
+              >
+                {isGenerating ? <Loader2 className="animate-spin" /> : "生成证明"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
