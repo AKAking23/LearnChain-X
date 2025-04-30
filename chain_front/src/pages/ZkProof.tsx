@@ -1,8 +1,9 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
+  useSuiClient,
 } from "@mysten/dapp-kit";
 import {
   generateAbilityProof,
@@ -14,11 +15,15 @@ import {
   createAddVerificationKeyParams,
 } from "../api/sui";
 import { Loader2 } from "lucide-react";
+import {
+  // TESTNET_ZK_VERIFIER_ID,
+  TESTNET_COUNTER_PACKAGE_ID,
+} from "@/utils/constants";
 
 // 样式定义
 const styles = {
   container: {
-    maxWidth: "800px",
+    maxWidth: "850px",
     margin: "0 auto",
     padding: "2rem",
     borderRadius: "12px",
@@ -105,11 +110,39 @@ const styles = {
     color: "#f59e0b",
     fontWeight: "bold",
   },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse" as const,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderRadius: "6px",
+  },
+  tableHeader: {
+    padding: "0.75rem",
+    textAlign: "left" as const,
+    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#fff",
+  },
+  tableCell: {
+    padding: "0.75rem",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#ddd",
+  },
 };
+
+// 验证记录类型定义
+interface VerificationRecord {
+  user: string;
+  circuitName: string;
+  isVerified: boolean;
+  requiredLevel: number;
+  timestamp: string;
+  transactionDigest: string;
+}
 
 const ZkProof: React.FC = () => {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
   const [userSbtLevel, setUserSbtLevel] = useState<number>(1); // 默认为中级
   const [requiredLevel, setRequiredLevel] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -121,6 +154,10 @@ const ZkProof: React.FC = () => {
     null
   );
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
+  const [verificationRecords, setVerificationRecords] = useState<
+    VerificationRecord[]
+  >([]);
+  const [isLoadingRecords, setIsLoadingRecords] = useState<boolean>(false);
 
   // 模拟的SBT ID (在实际应用中应从链上查询用户的SBT)
   const mockSbtId = BigInt("123456789");
@@ -129,6 +166,55 @@ const ZkProof: React.FC = () => {
   const getChallenge = () => {
     return BigInt(Math.floor(Math.random() * 1000000000));
   };
+
+  // 获取验证记录
+  const fetchVerificationRecords = async () => {
+    if (!suiClient) return;
+
+    setIsLoadingRecords(true);
+    try {
+      // 查询VerificationResult事件
+      const events = await suiClient.queryEvents({
+        query: {
+          MoveEventType: `${TESTNET_COUNTER_PACKAGE_ID}::zk_verifier::VerificationResult`,
+        },
+        limit: 50, // 获取最近的50条记录
+      });
+
+      // 处理事件数据
+      const records: VerificationRecord[] = events.data.map((event) => {
+        const fields = event.parsedJson as {
+          user: string;
+          circuit_name: string;
+          is_verified: boolean;
+          required_level: number;
+        };
+
+        return {
+          user: fields.user,
+          circuitName: fields.circuit_name,
+          isVerified: fields.is_verified,
+          requiredLevel: fields.required_level,
+          timestamp: new Date(Number(event.timestampMs)).toLocaleString(),
+          transactionDigest: event.id.txDigest,
+        };
+      });
+
+      setVerificationRecords(records);
+    } catch (error) {
+      console.error("获取验证记录失败:", error);
+      alert("获取验证记录失败: " + (error as Error).message);
+    } finally {
+      setIsLoadingRecords(false);
+    }
+  };
+
+  // 当管理员面板显示时获取验证记录
+  useEffect(() => {
+    if (showAdminPanel) {
+      fetchVerificationRecords();
+    }
+  }, [showAdminPanel]);
 
   const handleGenerateProof = async () => {
     if (!currentAccount) {
@@ -170,7 +256,7 @@ const ZkProof: React.FC = () => {
       // 获取验证器对象ID
       const verifierId = await getVerifierId();
       // const circuitName = "ability" + new Date(); // 电路名称  后续可改为企业/社区名称
-      const circuitName = "ability"; // 电路名称  后续可改为企业/社区名称
+      const circuitName = "abilityxxx1"; // 电路名称  后续可改为企业/社区名称
 
       // 创建并执行交易
       const txParams = createVerifyZkProofParams(
@@ -187,6 +273,10 @@ const ZkProof: React.FC = () => {
           setVerificationResult(true);
           alert("证明验证成功！");
           setIsVerifying(false);
+          // 如果管理员面板打开，刷新验证记录
+          if (showAdminPanel) {
+            fetchVerificationRecords();
+          }
         },
         onError: (error) => {
           console.error("交易失败:", error);
@@ -215,7 +305,8 @@ const ZkProof: React.FC = () => {
     try {
       // 获取验证器ID
       const verifierId = await getVerifierId();
-      const circuitName = "ability" + new Date().getTime(); // 电路名称
+      // const circuitName = "ability" + new Date().getTime(); // 电路名称
+      const circuitName = "abilityxxx1"; // 电路名称
 
       // 获取验证密钥
       const verificationKey = await getVerificationKey();
@@ -247,41 +338,61 @@ const ZkProof: React.FC = () => {
     }
   };
 
+  // 格式化地址显示
+  const formatAddress = (address: string) => {
+    return (
+      address.substring(0, 6) + "..." + address.substring(address.length - 4)
+    );
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>企业、社区认证</h1>
-
       {/* 管理员面板切换按钮 */}
-      <div style={{ textAlign: "right", marginBottom: "1rem" }}>
-        <button
-          style={{
-            ...styles.button,
-            backgroundColor: "#6b7280",
-            padding: "0.5rem 1rem",
-          }}
-          onClick={() => setShowAdminPanel(!showAdminPanel)}
-        >
-          {showAdminPanel ? "隐藏管理员面板" : "显示管理员面板"}
-        </button>
-        {/* <button
-          style={styles.button}
-          onClick={handleAddVerificationKey}
-          disabled={isAddingKey}
-        >
-          {isAddingKey ? <Loader2 className="animate-spin" /> : "添加验证密钥"}
-        </button> */}
-      </div>
+      {currentAccount && (
+        <div style={{ textAlign: "right", marginBottom: "1rem" }}>
+          <button
+            style={{
+              ...styles.button,
+              backgroundColor: "#6b7280",
+              padding: "0.5rem 1rem",
+            }}
+            onClick={() => setShowAdminPanel(!showAdminPanel)}
+          >
+            {showAdminPanel ? "隐藏管理员面板" : "显示管理员面板"}
+          </button>
+        </div>
+      )}
 
       {/* 管理员面板 */}
       {showAdminPanel && (
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>管理员面板</h2>
           <div style={styles.card}>
-            <p style={styles.description}>
-              添加验证密钥是验证零知识证明的必要步骤。只有验证器的管理员才能执行此操作。
-            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "1rem",
+              }}
+            >
+              <p style={styles.description}>
+                管理员功能：查看用户认证记录和添加验证密钥
+              </p>
+              <button
+                style={styles.button}
+                onClick={fetchVerificationRecords}
+                disabled={isLoadingRecords}
+              >
+                {isLoadingRecords ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "刷新记录"
+                )}
+              </button>
+            </div>
             <button
-              style={styles.button}
+              style={{ ...styles.button, marginBottom: "1.5rem" }}
               onClick={handleAddVerificationKey}
               disabled={isAddingKey}
             >
@@ -291,11 +402,71 @@ const ZkProof: React.FC = () => {
                 "添加验证密钥"
               )}
             </button>
+
+            <h3 style={styles.sectionTitle}>用户认证记录</h3>
+            {isLoadingRecords ? (
+              <div style={{ textAlign: "center", padding: "2rem" }}>
+                <Loader2 className="animate-spin" size={24} />
+                <p style={{ marginTop: "1rem" }}>加载记录中...</p>
+              </div>
+            ) : verificationRecords.length > 0 ? (
+              <div style={{ overflowX: "auto" }}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.tableHeader}>用户地址</th>
+                      <th style={styles.tableHeader}>电路名称</th>
+                      <th style={styles.tableHeader}>验证结果</th>
+                      <th style={styles.tableHeader}>要求等级</th>
+                      <th style={styles.tableHeader}>时间</th>
+                      <th style={styles.tableHeader}>交易ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {verificationRecords.map((record, index) => (
+                      <tr key={index}>
+                        <td style={styles.tableCell}>
+                          {formatAddress(record.user)}
+                        </td>
+                        <td style={styles.tableCell}>{record.circuitName}</td>
+                        <td
+                          style={{
+                            ...styles.tableCell,
+                            color: record.isVerified ? "#10b981" : "#ef4444",
+                          }}
+                        >
+                          {record.isVerified ? "验证成功" : "验证失败"}
+                        </td>
+                        <td style={styles.tableCell}>
+                          {record.requiredLevel == 1
+                            ? "初级"
+                            : record.requiredLevel == 2
+                            ? "中级"
+                            : "高级"}
+                        </td>
+                        <td style={styles.tableCell}>{record.timestamp}</td>
+                        <td style={styles.tableCell}>
+                          <a
+                            href={`https://suiscan.xyz/testnet/tx/${record.transactionDigest}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#3b82f6", textDecoration: "none" }}
+                          >
+                            {formatAddress(record.transactionDigest)}
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p style={{ color: "#ddd", textAlign: "center" }}>暂无认证记录</p>
+            )}
           </div>
         </div>
       )}
       <div style={styles.section}>
-        {/* <h2 style={styles.sectionTitle}>什么是零知识证明？</h2> */}
         <p style={styles.description}>
           向企业证明你拥有特定等级的能力凭证，而不必透露你的实际SBT内容或精确分数。
         </p>
