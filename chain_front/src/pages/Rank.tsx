@@ -13,6 +13,7 @@ import "../styles/Rank.css";
 import { createQueryBlobsTransaction } from "@/api/walrus";
 import { TESTNET_COUNTER_PACKAGE_ID } from "@/utils/constants";
 import { Transaction } from "@mysten/sui/transactions";
+import { fromHex } from "@mysten/sui/utils";
 
 interface QuizQuestion {
   id?: number;
@@ -44,90 +45,95 @@ const Rank: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // 创建Seal客户端，使用类型断言处理版本兼容性问题
-  // @ts-ignore - 忽略SuiClient版本兼容性问题
+  // @ts-expect-error - 处理SuiClient版本兼容性问题
   const sealClient = new SealClient({
     suiClient,
     serverObjectIds: getAllowlistedKeyServers("testnet"),
     verifyKeyServers: false,
   });
 
-  //   // 从链上查询指定难度的题目Blob列表
+  // 从链上查询指定难度的题目Blob列表
   const fetchQuizBlobsByDifficulty = async () => {
-    //     if (!currentAccount) return;
-    //     setError(null);
-    //     setLoading(true);
-    //     try {
-    //       // 创建查询交易
-    //       const tx = createQueryBlobsTransaction(
-    //         difficulty,
-    //         TESTNET_COUNTER_PACKAGE_ID
-    //       );
-    //       console.log(tx);
-    //       // 使用signAndExecuteTransaction钩子代替直接调用suiClient
-    //       signAndExecuteTransaction(
-    //         { transaction: tx as any }, // 使用类型断言解决类型兼容性问题
-    //         {
-    //           onSuccess: (result) => {
-    //             console.log("查询交易执行成功:", result);
-    //             // 从交易结果中提取事件
-    //             // @ts-expect-error - 处理返回值结构不兼容问题
-    //             const events = result.events || [];
-    //             // 查找BlobPublished事件
-    //             const blobEvents = events.filter(
-    //               (event: any) =>
-    //                 event.type?.includes("BlobPublished") &&
-    //                 event.parsedJson?.difficulty === difficulty
-    //             );
-    //             if (blobEvents.length > 0) {
-    //               // 获取最近的一个事件
-    //               const latestEvent = blobEvents[blobEvents.length - 1];
-    //               const blobId = latestEvent.parsedJson?.blob_id;
-    //               const eventTx = latestEvent.id?.txDigest;
-    //               if (blobId) {
-    //                 // 存储到localStorage
-    //                 const encryptedKey = `encrypted_${difficulty}_${currentAccount.address}`;
-    //                 localStorage.setItem(encryptedKey, blobId);
-    //                 // 构建Sui对象URL
-    //                 const suiUrl = `https://suiscan.xyz/testnet/object/${eventTx}`;
-    //                 const encryptedSuiUrl = `encryptedSuiUrl_${difficulty}_${currentAccount.address}`;
-    //                 localStorage.setItem(encryptedSuiUrl, suiUrl);
-    //                 // 更新状态
-    //                 setWalrusBlobId(blobId);
-    //                 setSuiWalrusUrl(suiUrl);
-    //                 setError(null);
-    //               } else {
-    //                 setError("无法从事件中提取blobId");
-    //               }
-    //             } else {
-    //               setError(`未找到${difficulty}难度的题目数据，请确认已完成答题`);
-    //             }
-    //             setLoading(false);
-    //           },
-    //           onError: (error) => {
-    //             console.error("查询题目Blob失败:", error);
-    //             setError(
-    //               `查询链上数据失败: ${
-    //                 error instanceof Error ? error.message : String(error)
-    //               }`
-    //             );
-    //             setLoading(false);
-    //           },
-    //         }
-    //       );
-    //     } catch (err) {
-    //       console.error("创建查询交易失败:", err);
-    //       setError(
-    //         `创建查询交易失败: ${err instanceof Error ? err.message : String(err)}`
-    //       );
-    //       setLoading(false);
-    //     }
+    if (!currentAccount) return;
+    setError(null);
+    setLoading(true);
+    try {
+      // 创建查询交易
+      const tx = createQueryBlobsTransaction(
+        difficulty,
+        TESTNET_COUNTER_PACKAGE_ID
+      );
+      console.log(tx);
+      // 使用signAndExecuteTransaction钩子代替直接调用suiClient
+      signAndExecuteTransaction(
+        { transaction: tx as any }, // 使用类型断言解决类型兼容性问题
+        {
+          onSuccess: (result) => {
+            console.log("查询交易执行成功:", result);
+            // 从交易结果中提取事件
+            // @ts-expect-error - 处理返回值结构不兼容问题
+            const events = result.events || [];
+            // 查找BlobPublished事件
+            const blobEvents = events.filter(
+              (event: any) =>
+                event.type?.includes("BlobPublished") &&
+                event.parsedJson?.difficulty === difficulty
+            );
+            if (blobEvents.length > 0) {
+              // 获取最近的一个事件
+              const latestEvent = blobEvents[blobEvents.length - 1];
+              const blobId = latestEvent.parsedJson?.blob_id;
+              const eventTx = latestEvent.id?.txDigest;
+              if (blobId) {
+                // 存储到localStorage
+                const encryptedKey = `encrypted_${difficulty}_${currentAccount.address}`;
+                localStorage.setItem(encryptedKey, blobId);
+                // 构建Sui对象URL
+                const suiUrl = `https://suiscan.xyz/testnet/object/${eventTx}`;
+                const encryptedSuiUrl = `encryptedSuiUrl_${difficulty}_${currentAccount.address}`;
+                localStorage.setItem(encryptedSuiUrl, suiUrl);
+                // 更新状态
+                setWalrusBlobId(blobId);
+                setSuiWalrusUrl(suiUrl);
+                setError(null);
+              } else {
+                setError("无法从事件中提取blobId");
+              }
+            } else {
+              setError(`未找到${difficulty}难度的题目数据，请确认已完成答题`);
+            }
+            setLoading(false);
+          },
+          onError: (error) => {
+            console.error("查询题目Blob失败:", error);
+            setError(
+              `查询链上数据失败: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            setLoading(false);
+          },
+        }
+      );
+    } catch (err) {
+      console.error("创建查询交易失败:", err);
+      setError(
+        `创建查询交易失败: ${err instanceof Error ? err.message : String(err)}`
+      );
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     // 从localStorage获取已存储的加密题目信息
     const fetchEncryptedQuizInfo = async () => {
-      setLoading(false);
+      setLoading(true);
       setTimeout(async () => {
+        if (!currentAccount) {
+          setLoading(false);
+          return;
+        }
+        
         const aggregators = [
           "aggregator1",
           "aggregator2",
@@ -136,12 +142,23 @@ const Rank: React.FC = () => {
           "aggregator5",
           "aggregator6",
         ];
-        const encryptedKey = `encrypted_${difficulty}_${currentAccount?.address}`;
+        const encryptedKey = `encrypted_${difficulty}_${currentAccount.address}`;
         console.log(encryptedKey, "encryptedKey--");
 
         const storedBlobId = localStorage.getItem(encryptedKey);
-        if (!storedBlobId) return;
+        if (!storedBlobId) {
+          setLoading(false);
+          return;
+        }
+        
         try {
+          // 设置blobId和URL
+          setWalrusBlobId(storedBlobId);
+          const storedSuiUrl = localStorage.getItem(`encryptedSuiUrl_${difficulty}_${currentAccount.address}`);
+          if (storedSuiUrl) {
+            setSuiWalrusUrl(storedSuiUrl);
+          }
+          
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 10000);
           const randomAggregator =
@@ -152,24 +169,34 @@ const Rank: React.FC = () => {
           });
           clearTimeout(timeout);
           if (!response.ok) {
-            return null;
+            setLoading(false);
+            return;
           }
           const encryptedData = await response.arrayBuffer();
 
           // 生成交易字节
           const tx = new Transaction();
+          tx.moveCall({
+            target: `${TESTNET_COUNTER_PACKAGE_ID}::allowlist::seal_approve`,
+            arguments: [
+              tx.pure.vector("u8", fromHex("0x...ENCRYPTION_ID")),
+              // 其他自定义参数
+            ]
+          });
+          // @ts-expect-error - 处理SuiClient版本兼容性问题
           const txBytes = await tx.build({
             client: suiClient,
             onlyTransactionKind: true,
           });
 
-          // 获取个人消息签名
-          // 创建带有签名的会话密钥
+          // 创建会话密钥
           const sessionKey = new SessionKey({
-            address: currentAccount?.address,
+            address: currentAccount.address as string,
             packageId: TESTNET_COUNTER_PACKAGE_ID,
             ttlMin: 10,
           });
+          
+          // 获取个人消息签名
           const signatureResult = await new Promise((resolve) => {
             signPersonalMessage(
               {
@@ -191,8 +218,12 @@ const Rank: React.FC = () => {
           // 如果获取签名失败，则返回
           if (!signatureResult) {
             console.error("无法获取个人消息签名");
-            return null;
+            setLoading(false);
+            return;
           }
+
+          // 使用签名更新会话密钥
+          sessionKey.setPersonalMessageSignature((signatureResult as any).signature);
 
           // 解密数据
           try {
@@ -204,9 +235,8 @@ const Rank: React.FC = () => {
 
             // 转换为文本并解析
             const textDecoder = new TextDecoder();
-            const jsonString = textDecoder.decode(
-              decryptedResult.data || decryptedResult
-            );
+            // @ts-expect-error - 处理数据格式兼容性问题
+            const jsonString = textDecoder.decode(decryptedResult);
             console.log(jsonString, "jsonString---");
 
             // 尝试解析JSON
@@ -222,22 +252,30 @@ const Rank: React.FC = () => {
                 "原始字符串:",
                 jsonString
               );
+              setError("解析JSON数据失败");
             }
           } catch (decryptError) {
             console.error("解密失败:", decryptError);
+            setError(`解密失败: ${
+              decryptError instanceof Error ? decryptError.message : String(decryptError)
+            }`);
           }
         } catch (err) {
           console.error(
             `Blob ${storedBlobId} cannot be retrieved from Walrus`,
             err
           );
-          return null;
+          setError(`无法从Walrus获取Blob数据: ${
+            err instanceof Error ? err.message : String(err)
+          }`);
+        } finally {
+          setLoading(false);
         }
       }, 1500);
     };
 
     fetchEncryptedQuizInfo();
-  }, [currentAccount, difficulty]);
+  }, [currentAccount, difficulty, suiClient]);
 
   // 从Walrus下载并解密题目数据
   const downloadAndDecryptQuiz = async () => {
@@ -261,17 +299,24 @@ const Rank: React.FC = () => {
 
       // 生成交易字节
       const tx = new Transaction();
+      // @ts-expect-error - 处理SuiClient版本兼容性问题
       const txBytes = await tx.build({
         client: suiClient,
         onlyTransactionKind: true,
       });
 
+      // 创建会话密钥
+      const sessionKey = new SessionKey({
+        address: currentAccount.address as string,
+        packageId: TESTNET_COUNTER_PACKAGE_ID,
+        ttlMin: 10,
+      });
+      
       // 获取个人消息签名
-      const personalMessage = `Decrypt quiz data for ${difficulty} level`;
       const signatureResult = await new Promise((resolve) => {
         signPersonalMessage(
           {
-            message: new TextEncoder().encode(personalMessage),
+            message: sessionKey.getPersonalMessage(),
           },
           {
             onSuccess: (result) => {
@@ -291,56 +336,39 @@ const Rank: React.FC = () => {
         throw new Error("无法获取个人消息签名");
       }
 
-    //   try {
-    //     // 创建带有签名的会话密钥
-    //     const sessionKey = new SessionKey({
-    //       address: currentAccount.address,
-    //       packageId: TESTNET_COUNTER_PACKAGE_ID,
-    //       ttlMin: 10,
-    //       personalMessageSignature: signatureResult.signature,
-    //     });
+      // 使用签名更新会话密钥
+      sessionKey.setPersonalMessageSignature((signatureResult as any).signature);
 
-    //     // 使用SealClient解密数据
-    //     const decryptedResult = await sealClient.decrypt({
-    //       data: new Uint8Array(encryptedData),
-    //       sessionKey,
-    //       txBytes,
-    //     });
+      // 使用SealClient解密数据
+      const decryptedResult = await sealClient.decrypt({
+        data: new Uint8Array(encryptedData),
+        sessionKey,
+        txBytes,
+      });
 
-    //     if (!decryptedResult) {
-    //       throw new Error("解密失败");
-    //     }
+      if (!decryptedResult) {
+        throw new Error("解密失败");
+      }
 
-    //     // 将解密后的二进制数据转换为文本
-    //     const textDecoder = new TextDecoder();
-    //     const jsonString = textDecoder.decode(
-    //       decryptedResult.data || decryptedResult
-    //     );
+      // 将解密后的二进制数据转换为文本
+      const textDecoder = new TextDecoder();
+      // @ts-expect-error - 处理数据格式兼容性问题
+      const jsonString = textDecoder.decode(decryptedResult);
 
-    //     // 解析JSON数据
-    //     const parsedData = JSON.parse(jsonString) as EncryptedQuizData;
-    //     setQuizData(parsedData);
+      // 解析JSON数据
+      const parsedData = JSON.parse(jsonString) as EncryptedQuizData;
+      setQuizData(parsedData);
 
-    //     console.log("成功解密题目数据:", parsedData);
-    //   } catch (decryptError) {
-    //     console.error("解密数据失败:", decryptError);
-    //     setError(
-    //       `解密数据失败: ${
-    //         decryptError instanceof Error
-    //           ? decryptError.message
-    //           : String(decryptError)
-    //       }`
-    //     );
-    //   }
+      console.log("成功解密题目数据:", parsedData);
     } catch (err) {
-    //   console.error("下载或解密题目数据失败:", err);
-    //   setError(
-    //     `下载或解密题目数据失败: ${
-    //       err instanceof Error ? err.message : String(err)
-    //     }`
-    //   );
+      console.error("下载或解密题目数据失败:", err);
+      setError(
+        `下载或解密题目数据失败: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
     } finally {
-    //   setDecrypting(false);
+      setDecrypting(false);
     }
   };
 

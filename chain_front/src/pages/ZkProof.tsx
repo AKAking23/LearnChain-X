@@ -164,19 +164,19 @@ const ZkProof: React.FC = () => {
   // 获取用户拥有的SBT
   const fetchUserSbt = async () => {
     if (!currentAccount || !suiClient) return;
-    
+
     setIsLoadingSbt(true);
     try {
       // 查询用户拥有的对象，筛选出SBT类型的对象
       const ownedObjects = await suiClient.getOwnedObjects({
         owner: currentAccount.address,
         filter: {
-          StructType: `${TESTNET_COUNTER_PACKAGE_ID}::sbt::SoulboundToken`
+          StructType: `${TESTNET_COUNTER_PACKAGE_ID}::sbt::SoulboundToken`,
         },
         options: {
           showContent: true,
           showType: true,
-        }
+        },
       });
 
       if (ownedObjects.data && ownedObjects.data.length > 0) {
@@ -185,12 +185,12 @@ const ZkProof: React.FC = () => {
         if (userSbtId) {
           console.log("获取到用户SBT ID:", userSbtId);
           // 将对象ID转换为BigInt（移除0x前缀并转为十进制BigInt）
-          const sbtIdBigInt = BigInt(parseInt(userSbtId.replace('0x', ''), 16));
+          const sbtIdBigInt = BigInt(parseInt(userSbtId.replace("0x", ""), 16));
           setSbtId(sbtIdBigInt);
           return;
         }
       }
-      
+
       console.log("用户没有SBT，使用模拟ID");
       // 如果没有找到SBT，使用模拟ID
       setSbtId(BigInt("123456789"));
@@ -247,7 +247,7 @@ const ZkProof: React.FC = () => {
           transactionDigest: event.id.txDigest,
         };
       });
-
+      // records.splice(0, 2);
       setVerificationRecords(records);
     } catch (error) {
       console.error("获取验证记录失败:", error);
@@ -282,12 +282,16 @@ const ZkProof: React.FC = () => {
       console.log(result, "result---");
       setProof(result.proof);
       setPublicInputs(result.publicInputs);
-      alert(`零知识证明生成成功！`);
+      setTimeout(() => {
+        alert(`零知识证明生成成功！`);
+        setIsGenerating(false);
+      }, 3000);
     } catch (error) {
       console.error("生成证明失败:", error);
       alert("生成证明失败: " + (error as Error).message);
-    } finally {
       setIsGenerating(false);
+    } finally {
+      // setIsGenerating(false);
     }
     console.log(isGenerating, "isGenerating---");
   };
@@ -304,7 +308,7 @@ const ZkProof: React.FC = () => {
       // 获取验证器对象ID
       const verifierId = await getVerifierId();
       // const circuitName = "ability" + new Date(); // 电路名称  后续可改为企业/社区名称
-      const circuitName = "abilityxxx1"; // 电路名称  后续可改为企业/社区名称
+      const circuitName = "MoveAbilityTest"; // 电路名称  后续可改为企业/社区名称
 
       // 创建并执行交易
       const txParams = createVerifyZkProofParams(
@@ -354,7 +358,7 @@ const ZkProof: React.FC = () => {
       // 获取验证器ID
       const verifierId = await getVerifierId();
       // const circuitName = "ability" + new Date().getTime(); // 电路名称
-      const circuitName = "abilityxxx1"; // 电路名称
+      const circuitName = "MoveAbilityTest"; // 电路名称
 
       // 获取验证密钥
       const verificationKey = await getVerificationKey();
@@ -567,7 +571,11 @@ const ZkProof: React.FC = () => {
                 onClick={handleGenerateProof}
                 disabled={isGenerating || !currentAccount}
               >
-                {isGenerating ? <Loader2 className="animate-spin" /> : "生成证明"}
+                {isGenerating ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "生成证明"
+                )}
               </button>
             </>
           )}
