@@ -268,4 +268,31 @@ export function createPublishBlobTransaction(
   
   tx.setGasBudget(10000000);
   return tx;
+}
+
+/**
+ * 创建查询指定难度的题目Blob列表的交易
+ * 注意：实际查询结果需要通过前端事件索引实现
+ * @param difficulty 题目难度级别
+ * @param packageId 包ID
+ * @param moduleName 模块名称，通常为"seal_quiz_walrus"
+ * @returns Transaction 交易对象
+ */
+export function createQueryBlobsTransaction(
+  difficulty: string,
+  packageId: string,
+  moduleName: string = "seal_quiz_walrus"
+): Transaction {
+  const tx = new Transaction();
+  
+  // 调用query_blobs_by_difficulty方法
+  tx.moveCall({
+    target: `${packageId}::${moduleName}::query_blobs_by_difficulty`,
+    arguments: [
+      tx.pure.string(difficulty),
+    ],
+  });
+  
+  tx.setGasBudget(10000000);
+  return tx;
 } 

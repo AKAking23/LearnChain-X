@@ -13,7 +13,7 @@ const InnerLayout: React.FC = () => {
       <header className="app-header">
         <div className="logo">
           {/* <Link to="/">LearnChain-X</Link> */}
-          <Link to="/">
+          <Link to="/dashboard">
             <img width={240} src={logoImage} alt="learnChain-X" />
           </Link>
         </div>

@@ -8,7 +8,7 @@ import NotFound from './pages/NotFound';
 import Wallet from './pages/Wallet';
 import Quiz from './pages/Quiz';
 import ZkProof from './pages/ZkProof';
-
+import Rank from './pages/Rank';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -41,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: 'zkproof',
         element: <ZkProof />
+      },
+      {
+        path: 'rank',
+        element: <Rank />
       },
       {
         path: '*',
