@@ -6,7 +6,12 @@ import {
   useSignAndExecuteTransaction,
   useSignPersonalMessage,
 } from "@mysten/dapp-kit";
-import { SealClient, getAllowlistedKeyServers, SessionKey } from "@mysten/seal";
+import {
+  SealClient,
+  getAllowlistedKeyServers,
+  SessionKey,
+  EncryptedObject,
+} from "@mysten/seal";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import "../styles/Rank.css";
@@ -14,7 +19,6 @@ import { createQueryBlobsTransaction } from "@/api/walrus";
 import { TESTNET_COUNTER_PACKAGE_ID } from "@/utils/constants";
 import { Transaction } from "@mysten/sui/transactions";
 import { fromHex } from "@mysten/sui/utils";
-
 interface QuizQuestion {
   id?: number;
   question: string;
@@ -133,7 +137,7 @@ const Rank: React.FC = () => {
           setLoading(false);
           return;
         }
-        
+
         const aggregators = [
           "aggregator1",
           "aggregator2",
@@ -150,15 +154,17 @@ const Rank: React.FC = () => {
           setLoading(false);
           return;
         }
-        
+
         try {
           // 设置blobId和URL
           setWalrusBlobId(storedBlobId);
-          const storedSuiUrl = localStorage.getItem(`encryptedSuiUrl_${difficulty}_${currentAccount.address}`);
+          const storedSuiUrl = localStorage.getItem(
+            `encryptedSuiUrl_${difficulty}_${currentAccount.address}`
+          );
           if (storedSuiUrl) {
             setSuiWalrusUrl(storedSuiUrl);
           }
-          
+
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 10000);
           const randomAggregator =
@@ -173,17 +179,38 @@ const Rank: React.FC = () => {
             return;
           }
           const encryptedData = await response.arrayBuffer();
+          console.log(encryptedData, "encryptedData---");
+          const ids = EncryptedObject.parse(new Uint8Array(encryptedData)).id;
+          console.log(ids, "ids---");
+          
 
           // 生成交易字节
           const tx = new Transaction();
           tx.moveCall({
             target: `${TESTNET_COUNTER_PACKAGE_ID}::allowlist::seal_approve`,
             arguments: [
-              tx.pure.vector("u8", fromHex("0x...ENCRYPTION_ID")),
-              // 其他自定义参数
-            ]
+              // 使用与加密时相同的策略ID，确保与Quiz.tsx中使用的policyObject一致
+              // 从localStorage获取用户地址并转换为字节数组
+              // tx.pure.vector(
+              //   "u8",
+              //   Array.from(new TextEncoder().encode(currentAccount.address))
+              // ),
+
+              // // 从本地存储获取白名单对象ID，如果不存在则使用默认值
+              // tx.object(localStorage.getItem("allowlist_object_id") || "0x0"),
+              // tx.pure.address(currentAccount.address),
+
+              tx.pure.vector('u8', fromHex(ids)),
+              tx.object(localStorage.getItem("allowlist_object_id") || "0x0"),
+              tx.pure.address(currentAccount.address),
+         
+            ],
           });
-          // @ts-expect-error - 处理SuiClient版本兼容性问题
+
+          // 添加明确的Gas预算
+          tx.setGasBudget(10000000);
+
+          // type MoveCallConstructor = (tx: Transaction, id: string) => void;
           const txBytes = await tx.build({
             client: suiClient,
             onlyTransactionKind: true,
@@ -195,7 +222,7 @@ const Rank: React.FC = () => {
             packageId: TESTNET_COUNTER_PACKAGE_ID,
             ttlMin: 10,
           });
-          
+
           // 获取个人消息签名
           const signatureResult = await new Promise((resolve) => {
             signPersonalMessage(
@@ -223,7 +250,9 @@ const Rank: React.FC = () => {
           }
 
           // 使用签名更新会话密钥
-          sessionKey.setPersonalMessageSignature((signatureResult as any).signature);
+          sessionKey.setPersonalMessageSignature(
+            (signatureResult as any).signature
+          );
 
           // 解密数据
           try {
@@ -232,6 +261,7 @@ const Rank: React.FC = () => {
               sessionKey,
               txBytes,
             });
+            console.log(decryptedResult, "decryptedResult");
 
             // 转换为文本并解析
             const textDecoder = new TextDecoder();
@@ -256,18 +286,24 @@ const Rank: React.FC = () => {
             }
           } catch (decryptError) {
             console.error("解密失败:", decryptError);
-            setError(`解密失败: ${
-              decryptError instanceof Error ? decryptError.message : String(decryptError)
-            }`);
+            setError(
+              `解密失败: ${
+                decryptError instanceof Error
+                  ? decryptError.message
+                  : String(decryptError)
+              }`
+            );
           }
         } catch (err) {
           console.error(
             `Blob ${storedBlobId} cannot be retrieved from Walrus`,
             err
           );
-          setError(`无法从Walrus获取Blob数据: ${
-            err instanceof Error ? err.message : String(err)
-          }`);
+          setError(
+            `无法从Walrus获取Blob数据: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
         } finally {
           setLoading(false);
         }
@@ -276,101 +312,6 @@ const Rank: React.FC = () => {
 
     fetchEncryptedQuizInfo();
   }, [currentAccount, difficulty, suiClient]);
-
-  // 从Walrus下载并解密题目数据
-  const downloadAndDecryptQuiz = async () => {
-    if (!walrusBlobId || !currentAccount) return;
-
-    setDecrypting(true);
-    setError(null);
-
-    try {
-      // 构建Walrus数据URL
-      const walrusUrl = `https://walrus.space/v1/blobs/${walrusBlobId}`;
-
-      // 获取加密数据
-      const response = await fetch(walrusUrl);
-      if (!response.ok) {
-        throw new Error(`获取加密数据失败: ${response.statusText}`);
-      }
-
-      // 获取加密数据的二进制内容
-      const encryptedData = await response.arrayBuffer();
-
-      // 生成交易字节
-      const tx = new Transaction();
-      // @ts-expect-error - 处理SuiClient版本兼容性问题
-      const txBytes = await tx.build({
-        client: suiClient,
-        onlyTransactionKind: true,
-      });
-
-      // 创建会话密钥
-      const sessionKey = new SessionKey({
-        address: currentAccount.address as string,
-        packageId: TESTNET_COUNTER_PACKAGE_ID,
-        ttlMin: 10,
-      });
-      
-      // 获取个人消息签名
-      const signatureResult = await new Promise((resolve) => {
-        signPersonalMessage(
-          {
-            message: sessionKey.getPersonalMessage(),
-          },
-          {
-            onSuccess: (result) => {
-              console.log("签名成功:", result);
-              resolve(result);
-            },
-            onError: (error) => {
-              console.error("签名失败:", error);
-              resolve(null);
-            },
-          }
-        );
-      });
-
-      // 如果获取签名失败，则返回
-      if (!signatureResult) {
-        throw new Error("无法获取个人消息签名");
-      }
-
-      // 使用签名更新会话密钥
-      sessionKey.setPersonalMessageSignature((signatureResult as any).signature);
-
-      // 使用SealClient解密数据
-      const decryptedResult = await sealClient.decrypt({
-        data: new Uint8Array(encryptedData),
-        sessionKey,
-        txBytes,
-      });
-
-      if (!decryptedResult) {
-        throw new Error("解密失败");
-      }
-
-      // 将解密后的二进制数据转换为文本
-      const textDecoder = new TextDecoder();
-      // @ts-expect-error - 处理数据格式兼容性问题
-      const jsonString = textDecoder.decode(decryptedResult);
-
-      // 解析JSON数据
-      const parsedData = JSON.parse(jsonString) as EncryptedQuizData;
-      setQuizData(parsedData);
-
-      console.log("成功解密题目数据:", parsedData);
-    } catch (err) {
-      console.error("下载或解密题目数据失败:", err);
-      setError(
-        `下载或解密题目数据失败: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    } finally {
-      setDecrypting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -419,21 +360,6 @@ const Rank: React.FC = () => {
               查看Sui对象
             </a>
           )}
-
-          <Button
-            onClick={downloadAndDecryptQuiz}
-            disabled={decrypting}
-            className="decrypt-button"
-          >
-            {decrypting ? (
-              <>
-                <Loader2 className="animate-spin mr-2" />
-                解密中...
-              </>
-            ) : (
-              "下载并解密题目数据"
-            )}
-          </Button>
         </div>
       )}
 

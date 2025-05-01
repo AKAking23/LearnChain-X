@@ -26,6 +26,7 @@ import {
   encryptAndUploadToWalrus,
   createPublishBlobTransaction,
 } from "@/api/walrus";
+import { Transaction } from "@mysten/sui/transactions";
 
 interface QuizQuestion {
   id?: number;
@@ -612,6 +613,106 @@ const Quiz: React.FC = () => {
 
     try {
       setEncryptingQuestions(true);
+      
+      // 检查是否已创建白名单或从localStorage获取白名单ID
+      let allowlistObjectId = localStorage.getItem("allowlist_object_id");
+      
+      // 如果没有白名单ID，创建一个新的白名单
+      if (!allowlistObjectId) {
+        try {
+          // 创建白名单交易
+          const createAllowlistTx = new Transaction();
+          createAllowlistTx.moveCall({
+            target: `${TESTNET_COUNTER_PACKAGE_ID}::allowlist::create_allowlist`,
+            arguments: []
+          });
+          
+          // 执行创建白名单交易
+          const createResult = await new Promise((resolve) => {
+            signAndExecuteTransaction(
+              { transaction: createAllowlistTx as any },
+              {
+                onSuccess: (result) => {
+                  console.log("白名单创建成功:", result);
+                  resolve(result);
+                },
+                onError: (error) => {
+                  console.error("白名单创建失败:", error);
+                  resolve(null);
+                }
+              }
+            );
+          });
+          console.log(createResult,'createResult');
+          
+          // 从交易结果中提取白名单对象ID
+          if (createResult) {
+            try {
+              console.log("交易结果：", createResult);
+              
+              // 交易完成后，直接查询用户拥有的Allowlist对象
+              const objects = await suiClient.getOwnedObjects({
+                owner: currentAccount.address,
+                filter: {
+                  StructType: `${TESTNET_COUNTER_PACKAGE_ID}::allowlist::Allowlist`
+                },
+                options: {
+                  showContent: true
+                }
+              });
+              
+              console.log("找到的白名单对象：", objects);
+              
+              if (objects && objects.data && objects.data.length > 0) {
+                // 获取最新创建的白名单对象ID
+                allowlistObjectId = objects.data[0].data?.objectId;
+                if (allowlistObjectId) {
+                  localStorage.setItem("allowlist_object_id", allowlistObjectId);
+                  console.log("已创建白名单并保存ID:", allowlistObjectId);
+                }
+              }
+            } catch (error) {
+              console.error("获取白名单对象失败:", error);
+            }
+          }
+        } catch (error) {
+          console.error("创建白名单失败:", error);
+        }
+      }
+      
+      // 如果已有白名单ID，将当前用户添加到白名单
+      if (allowlistObjectId && currentAccount) {
+        try {
+          // 创建添加用户到白名单的交易
+          const addToAllowlistTx = new Transaction();
+          addToAllowlistTx.moveCall({
+            target: `${TESTNET_COUNTER_PACKAGE_ID}::allowlist::add_to_allowlist`,
+            arguments: [
+              addToAllowlistTx.object(allowlistObjectId),
+              addToAllowlistTx.pure.address(currentAccount.address)
+            ]
+          });
+          
+          // 执行添加用户到白名单的交易
+          await new Promise((resolve) => {
+            signAndExecuteTransaction(
+              { transaction: addToAllowlistTx as any },
+              {
+                onSuccess: (result) => {
+                  console.log("用户已添加到白名单:", result);
+                  resolve(result);
+                },
+                onError: (error) => {
+                  console.error("添加用户到白名单失败:", error);
+                  resolve(null);
+                }
+              }
+            );
+          });
+        } catch (error) {
+          console.error("添加用户到白名单失败:", error);
+        }
+      }
 
       // 创建包含题目和答案的数据结构
       const questionsData = {
